@@ -1,251 +1,492 @@
+export const regions = ["Singapore", "Malaysia", "Thailand", "Indonesia"] as const;
+export const channels = ["Organic", "Paid Search", "Social", "Affiliate"] as const;
+export const categories = ["Electronics", "Beauty", "Home", "Fashion", "Groceries"] as const;
+
+export type Region = (typeof regions)[number];
+export type Channel = (typeof channels)[number];
+export type Category = (typeof categories)[number];
+
+export interface OrderRow {
+  order_id: string;
+  order_date: string;
+  customer_id: string;
+  product_id: string;
+  region: Region;
+  channel: Channel;
+  category: Category;
+  revenue: number;
+  discount_amount: number;
+  quantity: number;
+  campaign_id: string | null;
+}
+
+export interface TrafficRow {
+  date: string;
+  region: Region;
+  channel: Channel;
+  sessions: number;
+  product_views: number;
+  add_to_cart: number;
+  checkout_started: number;
+  orders: number;
+}
+
+export interface CampaignRow {
+  campaign_id: string;
+  campaign_name: string;
+  start_date: string;
+  end_date: string;
+  region: Region;
+  channel: Channel;
+  budget: number;
+  campaign_type: "Always On" | "Seasonal" | "Launch" | "Retention";
+}
+
+export interface ProductRow {
+  product_id: string;
+  category: Category;
+  product_name: string;
+  unit_cost: number;
+  launch_date: string;
+}
+
+export interface CustomerMaskedRow {
+  customer_id: string;
+  customer_segment: "New" | "Returning" | "Loyal";
+  region: Region;
+  signup_date: string;
+  is_sensitive_masked: boolean;
+}
+
+export interface RefundRow {
+  refund_id: string;
+  order_id: string;
+  refund_date: string;
+  refund_amount: number;
+  refund_reason: "Damaged Item" | "Late Delivery" | "Changed Mind" | "Duplicate Order";
+}
+
+export interface ExperimentEventRow {
+  event_date: string;
+  experiment_id: "EXP-FUNNEL-01" | "EXP-CHECKOUT-02";
+  variant: "Control" | "Treatment";
+  region: Region;
+  channel: Channel;
+  sessions: number;
+  pdp_views: number;
+  add_to_cart: number;
+  checkout_started: number;
+  orders: number;
+  gmv: number;
+  active_users: number;
+}
+
 export interface SyntheticOrder {
   orderId: string;
   orderDate: string;
   orderMonth: string;
-  region: "North" | "South" | "East" | "West";
-  category: "Hardware" | "Software" | "Services" | "Accessories";
-  channel: "Organic" | "Paid Search" | "Partner" | "Email";
-  customerSegment: "Small Business" | "Mid Market" | "Enterprise";
+  region: Region;
+  category: Category;
+  channel: Channel;
+  customerSegment: CustomerMaskedRow["customer_segment"];
   revenue: number;
   cost: number;
   units: number;
   returned: boolean;
 }
 
-export const syntheticOrders: SyntheticOrder[] = [
+const startDate = new Date("2026-01-01T00:00:00.000Z");
+const dayCount = 186;
+const revenueDropStart = "2026-06-17";
+const revenueDropEnd = "2026-06-23";
+const refundSpikeStart = "2026-05-14";
+const refundSpikeEnd = "2026-05-20";
+
+function isoDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function addDays(date: Date, days: number) {
+  const nextDate = new Date(date);
+  nextDate.setUTCDate(nextDate.getUTCDate() + days);
+  return nextDate;
+}
+
+function dateRange() {
+  return Array.from({ length: dayCount }, (_, index) => isoDate(addDays(startDate, index)));
+}
+
+function isBetween(date: string, start: string, end: string) {
+  return date >= start && date <= end;
+}
+
+function hashString(value: string) {
+  return Array.from(value).reduce((hash, character) => {
+    return (hash * 31 + character.charCodeAt(0)) % 100000;
+  }, 17);
+}
+
+function dailyVariation(date: string, seed: string) {
+  const dayIndex = Math.floor(
+    (new Date(`${date}T00:00:00.000Z`).getTime() - startDate.getTime()) / 86400000
+  );
+  const weeklyWave = Math.sin((dayIndex / 7) * Math.PI * 2) * 0.08;
+  const deterministicNoise = ((hashString(`${date}-${seed}`) % 17) - 8) / 100;
+  return 1 + weeklyWave + deterministicNoise;
+}
+
+function roundCurrency(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+function getCampaignId(date: string, region: Region, channel: Channel) {
+  const campaign = campaigns.find(
+    (candidate) =>
+      candidate.region === region &&
+      candidate.channel === channel &&
+      date >= candidate.start_date &&
+      date <= candidate.end_date
+  );
+
+  return campaign?.campaign_id ?? null;
+}
+
+export const products: ProductRow[] = [
   {
-    orderId: "SO-1001",
-    orderDate: "2026-01-04",
-    orderMonth: "2026-01",
-    region: "North",
-    category: "Hardware",
-    channel: "Organic",
-    customerSegment: "Small Business",
-    revenue: 12400,
-    cost: 7700,
-    units: 18,
-    returned: false
+    product_id: "P001",
+    category: "Electronics",
+    product_name: "Demo Wireless Hub",
+    unit_cost: 88,
+    launch_date: "2025-10-01"
   },
   {
-    orderId: "SO-1002",
-    orderDate: "2026-01-11",
-    orderMonth: "2026-01",
-    region: "West",
-    category: "Software",
-    channel: "Paid Search",
-    customerSegment: "Mid Market",
-    revenue: 18300,
-    cost: 6900,
-    units: 24,
-    returned: false
+    product_id: "P002",
+    category: "Electronics",
+    product_name: "Demo Smart Lamp",
+    unit_cost: 34,
+    launch_date: "2025-11-15"
   },
   {
-    orderId: "SO-1003",
-    orderDate: "2026-01-20",
-    orderMonth: "2026-01",
-    region: "East",
-    category: "Services",
-    channel: "Partner",
-    customerSegment: "Enterprise",
-    revenue: 22200,
-    cost: 14200,
-    units: 9,
-    returned: false
+    product_id: "P003",
+    category: "Beauty",
+    product_name: "Demo Daily Serum",
+    unit_cost: 16,
+    launch_date: "2025-09-20"
   },
   {
-    orderId: "SO-1004",
-    orderDate: "2026-02-02",
-    orderMonth: "2026-02",
-    region: "South",
-    category: "Accessories",
-    channel: "Email",
-    customerSegment: "Small Business",
-    revenue: 7600,
-    cost: 4100,
-    units: 31,
-    returned: false
+    product_id: "P004",
+    category: "Beauty",
+    product_name: "Demo Refill Kit",
+    unit_cost: 12,
+    launch_date: "2025-12-05"
   },
   {
-    orderId: "SO-1005",
-    orderDate: "2026-02-08",
-    orderMonth: "2026-02",
-    region: "North",
-    category: "Software",
-    channel: "Organic",
-    customerSegment: "Enterprise",
-    revenue: 26800,
-    cost: 9400,
-    units: 26,
-    returned: false
+    product_id: "P005",
+    category: "Home",
+    product_name: "Demo Storage Set",
+    unit_cost: 23,
+    launch_date: "2025-08-12"
   },
   {
-    orderId: "SO-1006",
-    orderDate: "2026-02-19",
-    orderMonth: "2026-02",
-    region: "West",
-    category: "Services",
-    channel: "Partner",
-    customerSegment: "Mid Market",
-    revenue: 19600,
-    cost: 12100,
-    units: 11,
-    returned: false
+    product_id: "P006",
+    category: "Home",
+    product_name: "Demo Desk Organizer",
+    unit_cost: 19,
+    launch_date: "2025-10-23"
   },
   {
-    orderId: "SO-1007",
-    orderDate: "2026-03-03",
-    orderMonth: "2026-03",
-    region: "East",
-    category: "Hardware",
-    channel: "Paid Search",
-    customerSegment: "Enterprise",
-    revenue: 31500,
-    cost: 19800,
-    units: 21,
-    returned: false
+    product_id: "P007",
+    category: "Fashion",
+    product_name: "Demo Travel Tote",
+    unit_cost: 29,
+    launch_date: "2025-09-01"
   },
   {
-    orderId: "SO-1008",
-    orderDate: "2026-03-14",
-    orderMonth: "2026-03",
-    region: "South",
-    category: "Software",
-    channel: "Email",
-    customerSegment: "Mid Market",
-    revenue: 24100,
-    cost: 8500,
-    units: 27,
-    returned: false
+    product_id: "P008",
+    category: "Fashion",
+    product_name: "Demo Active Jacket",
+    unit_cost: 42,
+    launch_date: "2025-11-01"
   },
   {
-    orderId: "SO-1009",
-    orderDate: "2026-03-24",
-    orderMonth: "2026-03",
-    region: "West",
-    category: "Accessories",
-    channel: "Organic",
-    customerSegment: "Small Business",
-    revenue: 9800,
-    cost: 5200,
-    units: 42,
-    returned: true
+    product_id: "P009",
+    category: "Groceries",
+    product_name: "Demo Pantry Box",
+    unit_cost: 14,
+    launch_date: "2025-07-15"
   },
   {
-    orderId: "SO-1010",
-    orderDate: "2026-04-05",
-    orderMonth: "2026-04",
-    region: "North",
-    category: "Services",
-    channel: "Partner",
-    customerSegment: "Enterprise",
-    revenue: 35200,
-    cost: 21400,
-    units: 14,
-    returned: false
-  },
-  {
-    orderId: "SO-1011",
-    orderDate: "2026-04-17",
-    orderMonth: "2026-04",
-    region: "East",
-    category: "Software",
-    channel: "Paid Search",
-    customerSegment: "Mid Market",
-    revenue: 28700,
-    cost: 10300,
-    units: 29,
-    returned: false
-  },
-  {
-    orderId: "SO-1012",
-    orderDate: "2026-04-27",
-    orderMonth: "2026-04",
-    region: "South",
-    category: "Hardware",
-    channel: "Organic",
-    customerSegment: "Small Business",
-    revenue: 16600,
-    cost: 10100,
-    units: 16,
-    returned: false
-  },
-  {
-    orderId: "SO-1013",
-    orderDate: "2026-05-04",
-    orderMonth: "2026-05",
-    region: "West",
-    category: "Software",
-    channel: "Partner",
-    customerSegment: "Enterprise",
-    revenue: 40200,
-    cost: 14500,
-    units: 35,
-    returned: false
-  },
-  {
-    orderId: "SO-1014",
-    orderDate: "2026-05-16",
-    orderMonth: "2026-05",
-    region: "North",
-    category: "Accessories",
-    channel: "Email",
-    customerSegment: "Small Business",
-    revenue: 11800,
-    cost: 6300,
-    units: 48,
-    returned: false
-  },
-  {
-    orderId: "SO-1015",
-    orderDate: "2026-05-25",
-    orderMonth: "2026-05",
-    region: "East",
-    category: "Services",
-    channel: "Organic",
-    customerSegment: "Enterprise",
-    revenue: 33100,
-    cost: 20400,
-    units: 13,
-    returned: false
-  },
-  {
-    orderId: "SO-1016",
-    orderDate: "2026-06-01",
-    orderMonth: "2026-06",
-    region: "South",
-    category: "Software",
-    channel: "Paid Search",
-    customerSegment: "Mid Market",
-    revenue: 36200,
-    cost: 12900,
-    units: 32,
-    returned: false
-  },
-  {
-    orderId: "SO-1017",
-    orderDate: "2026-06-12",
-    orderMonth: "2026-06",
-    region: "West",
-    category: "Hardware",
-    channel: "Partner",
-    customerSegment: "Enterprise",
-    revenue: 29800,
-    cost: 18400,
-    units: 20,
-    returned: false
-  },
-  {
-    orderId: "SO-1018",
-    orderDate: "2026-06-23",
-    orderMonth: "2026-06",
-    region: "East",
-    category: "Accessories",
-    channel: "Email",
-    customerSegment: "Small Business",
-    revenue: 13600,
-    cost: 7200,
-    units: 55,
-    returned: false
+    product_id: "P010",
+    category: "Groceries",
+    product_name: "Demo Snack Pack",
+    unit_cost: 8,
+    launch_date: "2025-12-18"
   }
 ];
+
+export const campaigns: CampaignRow[] = [
+  {
+    campaign_id: "C001",
+    campaign_name: "Demo Regional Growth Sprint",
+    start_date: "2026-02-10",
+    end_date: "2026-03-09",
+    region: "Singapore",
+    channel: "Paid Search",
+    budget: 42000,
+    campaign_type: "Seasonal"
+  },
+  {
+    campaign_id: "C002",
+    campaign_name: "Demo Social Launch",
+    start_date: "2026-03-20",
+    end_date: "2026-04-16",
+    region: "Malaysia",
+    channel: "Social",
+    budget: 36000,
+    campaign_type: "Launch"
+  },
+  {
+    campaign_id: "C003",
+    campaign_name: "Demo Affiliate Boost",
+    start_date: "2026-05-05",
+    end_date: "2026-06-01",
+    region: "Thailand",
+    channel: "Affiliate",
+    budget: 28000,
+    campaign_type: "Always On"
+  },
+  {
+    campaign_id: "C004",
+    campaign_name: "Demo Retention Push",
+    start_date: "2026-06-10",
+    end_date: "2026-06-30",
+    region: "Indonesia",
+    channel: "Organic",
+    budget: 18000,
+    campaign_type: "Retention"
+  }
+];
+
+export const customers_masked: CustomerMaskedRow[] = Array.from(
+  { length: 240 },
+  (_, index) => {
+    const region = regions[index % regions.length];
+    const segmentIndex = index % 3;
+
+    return {
+      customer_id: `M-CUST-${String(index + 1).padStart(4, "0")}`,
+      customer_segment: segmentIndex === 0 ? "New" : segmentIndex === 1 ? "Returning" : "Loyal",
+      region,
+      signup_date: isoDate(addDays(new Date("2025-01-01T00:00:00.000Z"), index * 3)),
+      is_sensitive_masked: true
+    };
+  }
+);
+
+export const traffic: TrafficRow[] = dateRange().flatMap((date) => {
+  return regions.flatMap((region, regionIndex) => {
+    return channels.map((channel, channelIndex) => {
+      const channelMultiplier = [1.12, 0.94, 0.86, 0.72][channelIndex];
+      const regionMultiplier = [1.18, 1.05, 0.96, 0.9][regionIndex];
+      const dropMultiplier = isBetween(date, revenueDropStart, revenueDropEnd) ? 0.62 : 1;
+      const sessions = Math.max(
+        80,
+        Math.round(
+          520 *
+            channelMultiplier *
+            regionMultiplier *
+            dailyVariation(date, `${region}-${channel}`) *
+            dropMultiplier
+        )
+      );
+      const product_views = Math.round(sessions * (1.8 + channelIndex * 0.08));
+      const add_to_cart = Math.round(product_views * (0.16 + regionIndex * 0.01));
+      const checkout_started = Math.round(add_to_cart * (0.58 - channelIndex * 0.025));
+      const orders = Math.max(
+        1,
+        Math.round(checkout_started * (0.48 + regionIndex * 0.018 - channelIndex * 0.01))
+      );
+
+      return {
+        date,
+        region,
+        channel,
+        sessions,
+        product_views,
+        add_to_cart,
+        checkout_started,
+        orders
+      };
+    });
+  });
+});
+
+export const orders: OrderRow[] = traffic.flatMap((trafficRow, trafficIndex) => {
+  const productOffset = hashString(
+    `${trafficRow.date}-${trafficRow.region}-${trafficRow.channel}`
+  );
+  const sampledOrderCount = Math.max(1, Math.round(trafficRow.orders / 18));
+
+  return Array.from({ length: sampledOrderCount }, (_, orderIndex) => {
+    const product = products[(productOffset + orderIndex) % products.length];
+    const customer =
+      customers_masked[(trafficIndex * 7 + orderIndex * 13) % customers_masked.length];
+    const dropMultiplier = isBetween(trafficRow.date, revenueDropStart, revenueDropEnd)
+      ? 0.72
+      : 1;
+    const quantity = 1 + ((productOffset + orderIndex) % 4);
+    const categoryMultiplier = 1 + categories.indexOf(product.category) * 0.09;
+    const channelMultiplier = 1 + channels.indexOf(trafficRow.channel) * 0.045;
+    const listPrice = product.unit_cost * (2.2 + categoryMultiplier + channelMultiplier);
+    const discount_amount = roundCurrency(
+      listPrice * quantity * (trafficRow.channel === "Paid Search" ? 0.11 : 0.06)
+    );
+    const revenue = roundCurrency(
+      Math.max(12, listPrice * quantity * dailyVariation(trafficRow.date, product.product_id) * dropMultiplier)
+    );
+
+    return {
+      order_id: `O-${trafficRow.date.replaceAll("-", "")}-${String(trafficIndex).padStart(
+        4,
+        "0"
+      )}-${String(orderIndex + 1).padStart(2, "0")}`,
+      order_date: trafficRow.date,
+      customer_id: customer.customer_id,
+      product_id: product.product_id,
+      region: trafficRow.region,
+      channel: trafficRow.channel,
+      category: product.category,
+      revenue,
+      discount_amount,
+      quantity,
+      campaign_id: getCampaignId(trafficRow.date, trafficRow.region, trafficRow.channel)
+    };
+  });
+});
+
+export const refunds: RefundRow[] = orders
+  .map((order, index) => {
+    const refundChance = isBetween(order.order_date, refundSpikeStart, refundSpikeEnd) ? 22 : 4;
+    const shouldRefund = hashString(`${order.order_id}-refund`) % 100 < refundChance;
+
+    if (!shouldRefund) {
+      return undefined;
+    }
+
+    const refundDelay = 1 + (hashString(`${order.order_id}-delay`) % 9);
+    const refundDate = isoDate(addDays(new Date(`${order.order_date}T00:00:00.000Z`), refundDelay));
+    const refundReasons: RefundRow["refund_reason"][] = [
+      "Damaged Item",
+      "Late Delivery",
+      "Changed Mind",
+      "Duplicate Order"
+    ];
+
+    return {
+      refund_id: `R-${String(index + 1).padStart(5, "0")}`,
+      order_id: order.order_id,
+      refund_date: refundDate,
+      refund_amount: roundCurrency(order.revenue * (0.35 + (index % 5) * 0.1)),
+      refund_reason: refundReasons[index % refundReasons.length]
+    };
+  })
+  .filter((refund): refund is RefundRow => Boolean(refund));
+
+export const experiment_events: ExperimentEventRow[] = dateRange().flatMap((date) => {
+  const experiments: ExperimentEventRow["experiment_id"][] = [
+    "EXP-FUNNEL-01",
+    "EXP-CHECKOUT-02"
+  ];
+  const variants: ExperimentEventRow["variant"][] = ["Control", "Treatment"];
+
+  return experiments.flatMap((experiment_id, experimentIndex) => {
+    return variants.flatMap((variant, variantIndex) => {
+      return regions.flatMap((region, regionIndex) => {
+        return channels.map((channel, channelIndex) => {
+          const baseSessions =
+            420 *
+            (1 + regionIndex * 0.06) *
+            (1 - channelIndex * 0.04) *
+            dailyVariation(date, `${experiment_id}-${variant}-${region}-${channel}`);
+          const treatmentLift = variant === "Treatment" ? 1.04 + experimentIndex * 0.03 : 1;
+          const dropMultiplier = isBetween(date, revenueDropStart, revenueDropEnd) ? 0.7 : 1;
+          const sessions = Math.max(60, Math.round(baseSessions * treatmentLift * dropMultiplier));
+          const pdp_views = Math.round(sessions * (1.55 + variantIndex * 0.03));
+          const add_to_cart = Math.round(pdp_views * (0.17 + variantIndex * 0.015));
+          const checkout_started = Math.round(add_to_cart * (0.56 + variantIndex * 0.02));
+          const orders = Math.round(checkout_started * (0.46 + variantIndex * 0.025));
+          const gmv = roundCurrency(orders * (78 + regionIndex * 6 + experimentIndex * 9));
+
+          return {
+            event_date: date,
+            experiment_id,
+            variant,
+            region,
+            channel,
+            sessions,
+            pdp_views,
+            add_to_cart,
+            checkout_started,
+            orders,
+            gmv,
+            active_users: Math.round(sessions * 0.72)
+          };
+        });
+      });
+    });
+  });
+});
+
+const productById = new Map(products.map((product) => [product.product_id, product]));
+const customerById = new Map(customers_masked.map((customer) => [customer.customer_id, customer]));
+const refundedOrderIds = new Set(refunds.map((refund) => refund.order_id));
+
+export const syntheticOrders: SyntheticOrder[] = orders.map((order) => {
+  const product = productById.get(order.product_id);
+  const customer = customerById.get(order.customer_id);
+
+  return {
+    orderId: order.order_id,
+    orderDate: order.order_date,
+    orderMonth: order.order_date.slice(0, 7),
+    region: order.region,
+    category: order.category,
+    channel: order.channel,
+    customerSegment: customer?.customer_segment ?? "Returning",
+    revenue: order.revenue,
+    cost: roundCurrency((product?.unit_cost ?? 10) * order.quantity),
+    units: order.quantity,
+    returned: refundedOrderIds.has(order.order_id)
+  };
+});
+
+export const syntheticEcommerce = {
+  orders,
+  traffic,
+  campaigns,
+  products,
+  customers_masked,
+  refunds,
+  experiment_events
+};
+
+export const syntheticDataNotes = {
+  dateRange: {
+    start: isoDate(startDate),
+    end: isoDate(addDays(startDate, dayCount - 1)),
+    days: dayCount
+  },
+  intentionalRevenueDropPeriod: {
+    start: revenueDropStart,
+    end: revenueDropEnd
+  },
+  refundSpikePeriod: {
+    start: refundSpikeStart,
+    end: refundSpikeEnd
+  },
+  incompleteLatestWeek: {
+    latestAvailableDate: isoDate(addDays(startDate, dayCount - 1)),
+    note: "The final synthetic week intentionally has fewer than 7 available days."
+  }
+};
 

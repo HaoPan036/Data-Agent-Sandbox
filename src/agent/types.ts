@@ -5,6 +5,9 @@ export type SupportedIntentId =
   | "profit_by_channel";
 
 export type ChartType = "line" | "bar";
+export type ColumnType = "string" | "number" | "boolean";
+export type TimeGrain = "day" | "week" | "month";
+export type SensitivityLevel = "public" | "masked" | "sensitive";
 
 export interface QuestionIntent {
   id: SupportedIntentId;
@@ -16,22 +19,40 @@ export interface QuestionIntent {
 
 export interface MetricDefinition {
   id: string;
-  label: string;
+  displayName: string;
   description: string;
-  sqlExpression: string;
-  valueType: "currency" | "number" | "percent";
+  formula: string;
+  sourceTables: string[];
+  requiredColumns: Record<string, string[]>;
+  allowedDimensions: string[];
+  defaultTimeGrain: TimeGrain;
+  caveats: string[];
+  sensitivityLevel: SensitivityLevel;
 }
 
 export interface TableColumn {
   name: string;
-  type: "string" | "number" | "boolean";
+  type: ColumnType;
   description: string;
+}
+
+export interface AllowedJoin {
+  tableName: string;
+  on: string;
+  relationship: "many-to-one" | "one-to-many" | "one-to-one";
 }
 
 export interface DatasetSchema {
   tableName: string;
+  displayName: string;
   description: string;
+  grain: string;
+  defaultDateColumn: string;
   columns: TableColumn[];
+  columnTypes: Record<string, ColumnType>;
+  allowedJoins: AllowedJoin[];
+  sensitiveColumns: string[];
+  sampleQuestions: string[];
 }
 
 export interface ChartSpec {

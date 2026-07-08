@@ -1,14 +1,13 @@
-import { getMetric } from "./metricCatalog";
 import type { QuestionIntent, SqlPlan, SupportedIntentId } from "./types";
 
-const revenue = getMetric("revenue");
-const profit = getMetric("profit");
+const revenueExpression = "SUM(revenue)";
+const profitExpression = "SUM(revenue) - SUM(cost)";
 
 const planByIntent: Record<SupportedIntentId, SqlPlan> = {
   monthly_revenue_trend: {
     intentId: "monthly_revenue_trend",
     title: "Monthly revenue trend",
-    sql: `SELECT orderMonth AS period, ${revenue.sqlExpression} AS revenue
+    sql: `SELECT orderMonth AS period, ${revenueExpression} AS revenue
 FROM ?
 GROUP BY orderMonth
 ORDER BY orderMonth`,
@@ -24,7 +23,7 @@ ORDER BY orderMonth`,
   regional_revenue: {
     intentId: "regional_revenue",
     title: "Revenue by region",
-    sql: `SELECT region, ${revenue.sqlExpression} AS revenue
+    sql: `SELECT region, ${revenueExpression} AS revenue
 FROM ?
 GROUP BY region
 ORDER BY revenue DESC`,
@@ -40,7 +39,7 @@ ORDER BY revenue DESC`,
   top_categories: {
     intentId: "top_categories",
     title: "Top categories by revenue",
-    sql: `SELECT category, ${revenue.sqlExpression} AS revenue
+    sql: `SELECT category, ${revenueExpression} AS revenue
 FROM ?
 GROUP BY category
 ORDER BY revenue DESC`,
@@ -56,7 +55,7 @@ ORDER BY revenue DESC`,
   profit_by_channel: {
     intentId: "profit_by_channel",
     title: "Profit by channel",
-    sql: `SELECT channel, ${profit.sqlExpression} AS profit
+    sql: `SELECT channel, ${profitExpression} AS profit
 FROM ?
 GROUP BY channel
 ORDER BY profit DESC`,
@@ -74,4 +73,3 @@ ORDER BY profit DESC`,
 export function generateSql(intent: QuestionIntent): SqlPlan {
   return planByIntent[intent.id];
 }
-
