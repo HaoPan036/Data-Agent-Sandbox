@@ -5,7 +5,7 @@ import { Badge } from "../ui/Badge";
 interface SidebarProps {
   activeTopicId?: string;
   onOpenOverview: () => void;
-  onOpenTopic: (topicId: string) => void;
+  onOpenTopic: (topicId: string, initialQuestion?: string) => void;
   topics: Topic[];
 }
 

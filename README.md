@@ -33,6 +33,10 @@ This stage adds the deterministic execution chain:
 - Governance support for blocking sensitive export and unsafe customer-record prompts.
 - Knowledge Base Demo remains metadata-only; retrieval execution is planned for a later stage.
 
+## Demo first Overview
+
+The Overview page now exposes a one click deterministic demo. Supported questions run through the real agent path, including intent routing, SQL generation, validation, local execution, trace logging, warnings, and grounded answers.
+
 ## Public Platform Layout
 
 The layout is an original public portfolio version inspired by common analytics platform patterns: left sidebar, recent sessions, available topics, main content area, topic information card, summary, data source overview, glossary preview, contents rail, sample question chips, and composer.
@@ -140,6 +144,10 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 - Experiment Metrics Demo 支持 GMV/active users 趋势、区域漏斗转化、变体 checkout abandonment、变体 revenue per session 和最新周完整性检查。
 - Governance 支持阻断敏感导出和不安全的客户记录请求。
 - Knowledge Base Demo 当前仍是 metadata-only，知识检索执行会在后续阶段接入。
+
+## Demo 优先的首页
+
+首页现在提供一键运行的确定性 demo。支持的问题会走真实 agent 链路，包括意图识别、SQL 生成、SQL 校验、本地执行、Trace、warnings 和基于结果的回答。
 
 ## 公共版平台布局
 

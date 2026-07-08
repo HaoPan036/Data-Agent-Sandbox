@@ -16,6 +16,7 @@ import { EmptyState } from "../components/ui/EmptyState";
 import type { Topic } from "../topics/topicTypes";
 
 interface TopicDetailPageProps {
+  initialQuestion?: string;
   topic: Topic;
 }
 
@@ -33,9 +34,19 @@ function supportedLabel(topicId: string) {
   return "Knowledge base retrieval execution is planned for a later stage.";
 }
 
-export function TopicDetailPage({ topic }: TopicDetailPageProps) {
-  const [selectedQuestion, setSelectedQuestion] = useState(topic.sampleQuestions[0] ?? "");
-  const [message, setMessage] = useState("");
+function executionCallout(topicId: string) {
+  if (topicId === "knowledge-base-demo") {
+    return "Metadata only. Retrieval execution planned later.";
+  }
+
+  return "Supported now: This topic can execute selected deterministic questions end to end.";
+}
+
+export function TopicDetailPage({ initialQuestion, topic }: TopicDetailPageProps) {
+  const [selectedQuestion, setSelectedQuestion] = useState(
+    initialQuestion ?? topic.sampleQuestions[0] ?? ""
+  );
+  const [message, setMessage] = useState(initialQuestion ? "Selected question is ready to run." : "");
   const [agentRun, setAgentRun] = useState<AgentRun | undefined>();
 
   function handleRun() {
@@ -94,6 +105,7 @@ export function TopicDetailPage({ topic }: TopicDetailPageProps) {
           onRun={handleRun}
           value={selectedQuestion}
         />
+        <div className="topic-execution-callout">{executionCallout(topic.id)}</div>
 
         {agentRun ? <ExecutionResultPanel run={agentRun} /> : null}
       </div>

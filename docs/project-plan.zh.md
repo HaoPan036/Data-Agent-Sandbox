@@ -10,6 +10,7 @@
 - 接入 Retail Growth Demo 和 Experiment Metrics Demo 示例问题的确定性执行。
 - 增加 intent routing、SQL generation、SQL validation、AlaSQL execution、trace steps、chart specs、grounded answers、warnings 和 guardrail decisions。
 - 增加 SQL、validation checks、结果行、chart preview、trace timeline、warnings、guardrail decision 和 suggested follow-ups 的 UI 面板。
+- 实现 demo 优先的 Overview，支持一键运行确定性 quick run。
 - 增加数据、语义元数据、Topic、页面、SQL 生成、SQL 校验、SQL 执行、agent run 和文档覆盖测试。
 
 ## 当前边界

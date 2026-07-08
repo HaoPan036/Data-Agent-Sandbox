@@ -7,7 +7,7 @@ interface AppShellProps {
   activeTopicId?: string;
   children: ReactNode;
   onOpenOverview: () => void;
-  onOpenTopic: (topicId: string) => void;
+  onOpenTopic: (topicId: string, initialQuestion?: string) => void;
   pageTitle: string;
   topics: Topic[];
 }
@@ -35,4 +35,3 @@ export function AppShell({
     </div>
   );
 }
-

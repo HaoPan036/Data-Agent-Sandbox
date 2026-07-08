@@ -10,6 +10,7 @@
 - Wired deterministic execution for Retail Growth Demo and Experiment Metrics Demo sample questions.
 - Added intent routing, SQL generation, SQL validation, AlaSQL execution, trace steps, chart specs, grounded answers, warnings, and guardrail decisions.
 - Added UI panels for generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
+- Implemented the demo first Overview with one click deterministic quick runs.
 - Added tests for data, semantic metadata, topics, pages, SQL generation, SQL validation, SQL execution, agent runs, and documentation coverage.
 
 ## Current Boundary

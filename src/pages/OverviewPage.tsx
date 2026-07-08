@@ -1,90 +1,95 @@
-import { AgentLifecyclePreview } from "../components/overview/AgentLifecyclePreview";
-import { CapabilityCard } from "../components/overview/CapabilityCard";
-import { ProofStrip } from "../components/overview/ProofStrip";
-import { TopicShowcaseCard } from "../components/overview/TopicShowcaseCard";
+import { CompactLifecycleStrip } from "../components/overview/CompactLifecycleStrip";
+import { CompactTopicCard } from "../components/overview/CompactTopicCard";
+import { QuickDemoRunner } from "../components/overview/QuickDemoRunner";
+import { StatusChipGrid } from "../components/overview/StatusChipGrid";
 import { Button } from "../components/ui/Button";
-import { SectionHeader } from "../components/ui/SectionHeader";
 import type { Topic } from "../topics/topicTypes";
 
 interface OverviewPageProps {
-  onOpenTopic: (topicId: string) => void;
+  onOpenTopic: (topicId: string, initialQuestion?: string) => void;
   topics: Topic[];
 }
 
-const platformCards = [
-  {
-    title: "Connect Synthetic Data",
-    description:
-      "Browser safe ecommerce, traffic, campaign, refund, and experiment tables.",
-    status: "Implemented"
-  },
-  {
-    title: "Build Topic Knowledge",
-    description:
-      "Metric definitions, glossary terms, caveats, and governance notes by topic.",
-    status: "Implemented"
-  },
-  {
-    title: "Prepare Governed Analysis",
-    description:
-      "Trace ready workflows for validated SQL, evaluation, human review, and reports.",
-    status: "Next stage"
-  }
-] as const;
-
 export function OverviewPage({ onOpenTopic, topics }: OverviewPageProps) {
+  const retailTopicId = topics.find((topic) => topic.id === "retail-growth-demo")?.id ?? topics[0]?.id ?? "";
+
+  function runQuickDemo() {
+    document.getElementById("quick-demo-run")?.click();
+  }
+
   return (
-    <div className="page-stack">
-      <section className="overview-hero">
-        <div className="overview-hero__copy">
-          <p className="eyebrow">Public Data Agent Lab</p>
-          <h2>Build observable and testable data agents</h2>
+    <div className="overview-demo-page">
+      <section className="overview-demo-hero">
+        <div className="overview-demo-hero__copy">
+          <p className="eyebrow">LIVE DETERMINISTIC DEMO</p>
+          <h2>Run a Governed Data Agent</h2>
           <p>
-            A portfolio safe sandbox for Topic setup, semantic models, metric
-            catalogs, governed analysis design, trace review, evaluation, and reports.
+            Ask a business question, generate validated SQL, execute it on synthetic data, and inspect the trace.
           </p>
           <div className="hero-actions">
-            <Button onClick={() => onOpenTopic(topics[0]?.id ?? "")} variant="primary">
-              Explore Demo Topics
+            <Button onClick={runQuickDemo} variant="primary">
+              Run Quick Demo
+            </Button>
+            <Button onClick={() => onOpenTopic(retailTopicId)} variant="secondary">
+              Open Retail Topic
             </Button>
             <Button
-              onClick={() => document.getElementById("proof-strip")?.scrollIntoView()}
-              variant="secondary"
+              onClick={() => document.getElementById("agent-lifecycle")?.scrollIntoView()}
+              variant="ghost"
             >
               View Architecture
             </Button>
           </div>
           <p className="hero-note">
-            Synthetic data only. No internal data, code, prompts, schemas, screenshots,
-            or proprietary workflows.
+            Synthetic data only. No internal data, code, prompts, schemas, screenshots, or proprietary workflows.
           </p>
         </div>
-        <AgentLifecyclePreview />
+
+        <QuickDemoRunner onOpenTopic={onOpenTopic} />
       </section>
 
-      <section className="platform-card-grid" aria-label="Platform capabilities">
-        {platformCards.map((card) => (
-          <CapabilityCard
-            description={card.description}
-            key={card.title}
-            status={card.status}
-            title={card.title}
-          />
-        ))}
+      <section className="overview-compact-section">
+        <div className="compact-section-heading">
+          <span className="section-header__eyebrow">What works now</span>
+          <h2>Live pieces</h2>
+        </div>
+        <StatusChipGrid />
       </section>
 
-      <ProofStrip />
+      <section className="overview-compact-section" id="agent-lifecycle">
+        <div className="compact-section-heading">
+          <span className="section-header__eyebrow">Agent lifecycle</span>
+          <h2>From question to answer</h2>
+        </div>
+        <CompactLifecycleStrip />
+      </section>
 
-      <section>
-        <SectionHeader
-          subtitle="Public, generic topics for portfolio-safe data-agent workflows."
-          title="Demo Topics"
-        />
-        <div className="topic-card-grid">
+      <section className="overview-compact-section">
+        <div className="compact-section-heading">
+          <span className="section-header__eyebrow">Demo topics</span>
+          <h2>Open a working topic</h2>
+        </div>
+        <div className="compact-topic-grid">
           {topics.map((topic) => (
-            <TopicShowcaseCard key={topic.id} onOpen={onOpenTopic} topic={topic} />
+            <CompactTopicCard
+              key={topic.id}
+              onOpen={onOpenTopic}
+              onRunSample={onOpenTopic}
+              topic={topic}
+            />
           ))}
         </div>
+      </section>
+
+      <section className="confidentiality-note">
+        <p>This sandbox uses synthetic ecommerce and experiment data only.</p>
+        <a
+          href="https://github.com/HaoPan036/Data-Agent-Sandbox/blob/main/docs/confidentiality.en.md"
+          rel="noreferrer"
+          target="_blank"
+        >
+          Read confidentiality boundary
+        </a>
       </section>
     </div>
   );
