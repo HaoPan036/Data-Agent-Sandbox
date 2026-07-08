@@ -1,4 +1,5 @@
 import type { Topic } from "../../topics/topicTypes";
+import { StatusPill } from "../ui/StatusPill";
 
 interface TopicSummaryProps {
   topic: Topic;
@@ -13,11 +14,10 @@ export function TopicSummary({ topic }: TopicSummaryProps) {
         {Object.entries(topic.governanceStatus).map(([key, value]) => (
           <div key={key}>
             <span>{key.replace(/([A-Z])/g, " $1")}</span>
-            <strong>{value}</strong>
+            <StatusPill tone={value === "Ready" ? "ready" : "planned"}>{value}</StatusPill>
           </div>
         ))}
       </div>
     </section>
   );
 }
-

@@ -1,4 +1,5 @@
 import type { Topic } from "../../topics/topicTypes";
+import { StatusPill } from "../ui/StatusPill";
 
 interface RecentSessionTreeProps {
   onOpenTopic: (topicId: string) => void;
@@ -19,7 +20,9 @@ export function RecentSessionTree({ onOpenTopic, topics }: RecentSessionTreeProp
             {topic.sessions.map((session) => (
               <li key={session.id}>
                 <span>{session.title}</span>
-                <small>{session.status}</small>
+                <StatusPill tone={session.status.toLowerCase() as "draft" | "reviewed" | "evaluated"}>
+                  {session.status}
+                </StatusPill>
               </li>
             ))}
           </ul>
@@ -28,4 +31,3 @@ export function RecentSessionTree({ onOpenTopic, topics }: RecentSessionTreeProp
     </div>
   );
 }
-

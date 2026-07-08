@@ -4,8 +4,12 @@ import { RightContents } from "../components/layout/RightContents";
 import { DataSourceOverview } from "../components/topic/DataSourceOverview";
 import { GlossaryPreview } from "../components/topic/GlossaryPreview";
 import { SampleQuestionList } from "../components/topic/SampleQuestionList";
+import { TopicHeader } from "../components/topic/TopicHeader";
+import { TopicHealthCard } from "../components/topic/TopicHealthCard";
 import { TopicInfoCard } from "../components/topic/TopicInfoCard";
 import { TopicSummary } from "../components/topic/TopicSummary";
+import { Card } from "../components/ui/Card";
+import { EmptyState } from "../components/ui/EmptyState";
 import type { Topic } from "../topics/topicTypes";
 
 interface TopicDetailPageProps {
@@ -19,30 +23,41 @@ export function TopicDetailPage({ topic }: TopicDetailPageProps) {
   const [message, setMessage] = useState("");
 
   function handleRun() {
-    setMessage("Agent execution will be implemented in the next stage.");
+    setMessage(
+      "Execution is not wired yet. Next stage connects this question to deterministic workflows."
+    );
+  }
+
+  function handleSkills() {
+    setMessage(
+      "Reusable Skills are documented in the topic layer. Execution wiring comes next."
+    );
   }
 
   return (
     <div className="topic-detail-layout">
       <div className="page-stack">
+        <TopicHeader topic={topic} />
         <TopicInfoCard topic={topic} />
         <TopicSummary topic={topic} />
         <DataSourceOverview topic={topic} />
         <GlossaryPreview topic={topic} />
 
-        <section className="panel">
+        <Card>
           <h2>What This Topic Can Answer</h2>
           <ul className="answer-list">
             {topic.sampleQuestions.map((question) => (
               <li key={question}>{question}</li>
             ))}
           </ul>
-        </section>
+        </Card>
 
         <SampleQuestionList
           onSelectQuestion={(question) => {
             setSelectedQuestion(question);
-            setMessage("");
+            setMessage(
+              "Selected question is ready. Execution will be implemented in the next stage."
+            );
           }}
           questions={topic.sampleQuestions}
           selectedQuestion={selectedQuestion}
@@ -54,13 +69,20 @@ export function TopicDetailPage({ topic }: TopicDetailPageProps) {
             setSelectedQuestion(value);
             setMessage("");
           }}
+          onSkills={handleSkills}
           onRun={handleRun}
           value={selectedQuestion}
         />
       </div>
 
-      <RightContents items={contents} />
+      <aside className="topic-right-rail">
+        <RightContents items={contents} />
+        <TopicHealthCard topic={topic} />
+        <EmptyState title="Next Stage">
+          Sample questions will wire into intent routing, SQL planning, validation,
+          local execution, trace logging, and grounded answers.
+        </EmptyState>
+      </aside>
     </div>
   );
 }
-

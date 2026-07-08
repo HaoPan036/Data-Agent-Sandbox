@@ -1,4 +1,5 @@
 import type { Topic } from "../../topics/topicTypes";
+import { Button } from "../ui/Button";
 
 interface GlossaryPreviewProps {
   topic: Topic;
@@ -19,7 +20,9 @@ export function GlossaryPreview({ topic }: GlossaryPreviewProps) {
           </article>
         ))}
       </div>
+      <Button disabled variant="ghost">
+        View all glossary terms · coming soon
+      </Button>
     </section>
   );
 }
-

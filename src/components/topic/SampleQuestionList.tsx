@@ -11,7 +11,10 @@ export function SampleQuestionList({
 }: SampleQuestionListProps) {
   return (
     <section className="sample-question-panel" id="sample-questions">
-      <h2>Sample Questions</h2>
+      <div>
+        <h2>Sample Questions</h2>
+        <p>Choose a prompt to prepare the composer. Execution comes in the next stage.</p>
+      </div>
       <div className="sample-chip-row">
         {questions.map((question) => (
           <button
@@ -27,4 +30,3 @@ export function SampleQuestionList({
     </section>
   );
 }
-

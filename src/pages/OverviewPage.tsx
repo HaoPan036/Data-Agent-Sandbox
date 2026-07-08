@@ -1,4 +1,9 @@
-import { TopicCard } from "../components/topic/TopicCard";
+import { AgentLifecyclePreview } from "../components/overview/AgentLifecyclePreview";
+import { CapabilityCard } from "../components/overview/CapabilityCard";
+import { ProofStrip } from "../components/overview/ProofStrip";
+import { TopicShowcaseCard } from "../components/overview/TopicShowcaseCard";
+import { Button } from "../components/ui/Button";
+import { SectionHeader } from "../components/ui/SectionHeader";
 import type { Topic } from "../topics/topicTypes";
 
 interface OverviewPageProps {
@@ -9,53 +14,78 @@ interface OverviewPageProps {
 const platformCards = [
   {
     title: "Connect Synthetic Data",
-    description: "Explore local browser-safe ecommerce, traffic, campaign, refund, and experiment tables."
+    description:
+      "Browser safe ecommerce, traffic, campaign, refund, and experiment tables.",
+    status: "Implemented"
   },
   {
     title: "Build Topic Knowledge",
-    description: "Organize metrics, glossary terms, source notes, caveats, and governance rules by topic."
+    description:
+      "Metric definitions, glossary terms, caveats, and governance notes by topic.",
+    status: "Implemented"
   },
   {
-    title: "Run Governed Analysis",
-    description: "Prepare the visible shell for validated SQL, traces, evaluation, and reports in the next stage."
+    title: "Prepare Governed Analysis",
+    description:
+      "Trace ready workflows for validated SQL, evaluation, human review, and reports.",
+    status: "Next stage"
   }
-];
+] as const;
 
 export function OverviewPage({ onOpenTopic, topics }: OverviewPageProps) {
   return (
     <div className="page-stack">
       <section className="overview-hero">
-        <div>
-          <p className="eyebrow">Runnable public simulation</p>
-          <h2>Make Data Agents Observable, Testable, and Governed</h2>
+        <div className="overview-hero__copy">
+          <p className="eyebrow">Public Data Agent Lab</p>
+          <h2>Build observable and testable data agents</h2>
           <p>
-            A public sandbox for turning business questions into validated SQL, traceable
-            analysis, evaluation results, and editable reports.
+            A portfolio safe sandbox for Topic setup, semantic models, metric
+            catalogs, governed analysis design, trace review, evaluation, and reports.
+          </p>
+          <div className="hero-actions">
+            <Button onClick={() => onOpenTopic(topics[0]?.id ?? "")} variant="primary">
+              Explore Demo Topics
+            </Button>
+            <Button
+              onClick={() => document.getElementById("proof-strip")?.scrollIntoView()}
+              variant="secondary"
+            >
+              View Architecture
+            </Button>
+          </div>
+          <p className="hero-note">
+            Synthetic data only. No internal data, code, prompts, schemas, screenshots,
+            or proprietary workflows.
           </p>
         </div>
+        <AgentLifecyclePreview />
       </section>
 
       <section className="platform-card-grid" aria-label="Platform capabilities">
         {platformCards.map((card) => (
-          <article className="panel" key={card.title}>
-            <h3>{card.title}</h3>
-            <p>{card.description}</p>
-          </article>
+          <CapabilityCard
+            description={card.description}
+            key={card.title}
+            status={card.status}
+            title={card.title}
+          />
         ))}
       </section>
 
+      <ProofStrip />
+
       <section>
-        <div className="section-heading">
-          <h2>Demo Topics</h2>
-          <p>Public, generic topics for portfolio-safe data-agent workflows.</p>
-        </div>
+        <SectionHeader
+          subtitle="Public, generic topics for portfolio-safe data-agent workflows."
+          title="Demo Topics"
+        />
         <div className="topic-card-grid">
           {topics.map((topic) => (
-            <TopicCard key={topic.id} onOpen={onOpenTopic} topic={topic} />
+            <TopicShowcaseCard key={topic.id} onOpen={onOpenTopic} topic={topic} />
           ))}
         </div>
       </section>
     </div>
   );
 }
-

@@ -1,5 +1,6 @@
 import type { Topic } from "../../topics/topicTypes";
 import { RecentSessionTree } from "../topic/RecentSessionTree";
+import { Badge } from "../ui/Badge";
 
 interface SidebarProps {
   activeTopicId?: string;
@@ -24,7 +25,8 @@ export function Sidebar({
       </div>
 
       <button className="new-topic-button" disabled type="button">
-        New Topic · coming soon
+        New Topic
+        <span>Coming soon</span>
       </button>
 
       <nav aria-label="Recent sessions" className="sidebar__section">
@@ -46,9 +48,10 @@ export function Sidebar({
             >
               <span>{topic.name}</span>
               <span className="topic-nav__labels">
-                {topic.tags.slice(0, 3).map((tag) => (
-                  <small key={tag}>{tag}</small>
-                ))}
+                <Badge tone="blue">Demo</Badge>
+                <Badge tone={topic.sourceType === "Markdown Knowledge" ? "violet" : "green"}>
+                  {topic.sourceType === "Markdown Knowledge" ? "Knowledge" : "Synthetic"}
+                </Badge>
               </span>
             </button>
           ))}
@@ -62,4 +65,3 @@ export function Sidebar({
     </aside>
   );
 }
-

@@ -1,4 +1,5 @@
 import type { Topic } from "../../topics/topicTypes";
+import { StatusPill } from "../ui/StatusPill";
 
 interface TopicInfoCardProps {
   topic: Topic;
@@ -11,14 +12,14 @@ export function TopicInfoCard({ topic }: TopicInfoCardProps) {
     ["Source", topic.sourceType],
     ["Created", topic.createdAt],
     ["Updated", topic.updatedAt],
-    ["Status", topic.status]
+    ["Governance status", "Sensitive policy ready"]
   ];
 
   return (
     <section className="panel" id="information">
       <div className="panel__heading">
         <h2>Information</h2>
-        <span className="status status--ready">{topic.status}</span>
+        <StatusPill tone="ready">{topic.status}</StatusPill>
       </div>
       <dl className="info-grid">
         {items.map(([label, value]) => (
@@ -31,4 +32,3 @@ export function TopicInfoCard({ topic }: TopicInfoCardProps) {
     </section>
   );
 }
-

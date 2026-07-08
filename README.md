@@ -14,6 +14,7 @@ The project answers a simple question: can a small BI data-agent workflow be mad
 
 - Vite, React, TypeScript, Vitest, Recharts, and AlaSQL setup.
 - Public platform shell with left navigation, recent sessions, available topics, top actions, topic detail pages, contents rail, sample question chips, and bottom composer.
+- Portfolio-ready UI polish with a compact hero, lifecycle preview, topic health metadata, and clearer next-stage labels.
 - Synthetic ecommerce, traffic, campaign, product, masked customer, refund, and experiment event tables.
 - Semantic schema metadata, metric catalog, topic catalog, and lightweight knowledge base.
 - Deterministic local test coverage for data, topics, schema, metrics, knowledge entries, and pages.
@@ -32,6 +33,10 @@ This stage adds the first public product shell and data foundation:
 ## Public Platform Layout
 
 The layout is an original public portfolio version inspired by common analytics platform patterns: left sidebar, recent sessions, available topics, main content area, topic information card, summary, data source overview, glossary preview, contents rail, sample question chips, and composer.
+
+## Visual Product Shell Status
+
+The current version implements the public product shell, synthetic topic layer, semantic model, metric catalog, knowledge base, and portfolio ready UI. Query execution is intentionally deferred to the next stage to avoid fake outputs.
 
 ## Synthetic Topics
 
@@ -63,7 +68,7 @@ The knowledge layer stores public, generic entries for metric definitions, exper
 
 ## Why Execution Is Not Implemented Yet
 
-This stage intentionally focuses on the topic platform shell and semantic foundation. Clicking a sample question or Run updates local UI state and shows: `Agent execution will be implemented in the next stage.` It does not fake SQL, answers, charts, or final analysis for topic questions.
+This stage intentionally focuses on the topic platform shell and semantic foundation. Clicking a sample question or Run updates local UI state and clearly says execution is not wired yet. It does not fake SQL, answers, charts, traces, or final analysis for topic questions.
 
 ## Next Stage: Deterministic Agent Workflows
 
@@ -165,11 +170,15 @@ schema 层定义了所有公开合成数据表：
 
 ## 为什么本阶段还不执行查询
 
-本阶段刻意聚焦 Topic 平台外壳和语义基础。点击示例问题或 Run 只会更新本地 UI 状态，并显示：`Agent execution will be implemented in the next stage.` 本阶段不会为 Topic 问题伪造 SQL、答案、图表或最终分析。
+本阶段刻意聚焦 Topic 平台外壳和语义基础。点击示例问题或 Run 只会更新本地 UI 状态，并明确提示执行尚未接入。本阶段不会为 Topic 问题伪造 SQL、答案、图表、Trace 或最终分析。
 
 ## 下一阶段：确定性 Agent 工作流
 
 下一阶段可以把选中的 Topic 问题连接到确定性路由、SQL 生成、SQL 校验、本地执行、trace review、evaluation 和可编辑报告。
+
+## 视觉产品外壳状态
+
+当前版本实现了公共版产品外壳、合成 Topic 层、语义模型、指标目录、知识库和适合作品集展示的 UI。查询执行会在下一阶段接入，本阶段不伪造 SQL、Trace 或回答。
 
 ## 系统架构
 
@@ -203,4 +212,3 @@ English boundary statement: This project uses synthetic or public data only. It 
 - 在新 shell 中增加 trace review 和 evaluation 视图。
 - 增加报告导出和可编辑 review 状态。
 - 仅在用户显式配置 API key 后增加可选 LLM 集成。
-

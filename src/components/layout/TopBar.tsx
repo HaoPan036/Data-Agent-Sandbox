@@ -1,3 +1,5 @@
+import { Button } from "../ui/Button";
+
 interface TopBarProps {
   pageTitle: string;
 }
@@ -13,12 +15,11 @@ export function TopBar({ pageTitle }: TopBarProps) {
       </div>
       <div className="top-bar__actions" aria-label="Page actions">
         {actions.map((action) => (
-          <button key={action} type="button">
+          <Button key={action} variant={action === "Run" ? "primary" : "secondary"}>
             {action}
-          </button>
+          </Button>
         ))}
       </div>
     </header>
   );
 }
-

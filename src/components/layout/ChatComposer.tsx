@@ -2,10 +2,17 @@ interface ChatComposerProps {
   message?: string;
   onChange: (value: string) => void;
   onRun: () => void;
+  onSkills: () => void;
   value: string;
 }
 
-export function ChatComposer({ message, onChange, onRun, value }: ChatComposerProps) {
+export function ChatComposer({
+  message,
+  onChange,
+  onRun,
+  onSkills,
+  value
+}: ChatComposerProps) {
   return (
     <section className="chat-composer" aria-label="Topic question composer">
       {message ? <p className="composer-message">{message}</p> : null}
@@ -19,10 +26,14 @@ export function ChatComposer({ message, onChange, onRun, value }: ChatComposerPr
         rows={2}
         value={value}
       />
-      <button className="primary-button" onClick={onRun} type="button">
-        Run
-      </button>
+      <div className="composer-actions">
+        <button className="button button--ghost" onClick={onSkills} type="button">
+          Skills
+        </button>
+        <button className="button button--primary" onClick={onRun} type="button">
+          Run
+        </button>
+      </div>
     </section>
   );
 }
-

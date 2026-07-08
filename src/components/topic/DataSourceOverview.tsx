@@ -1,3 +1,4 @@
+import { schemaByTable } from "../../agent/schema";
 import type { Topic } from "../../topics/topicTypes";
 
 interface DataSourceOverviewProps {
@@ -17,26 +18,32 @@ export function DataSourceOverview({ topic }: DataSourceOverviewProps) {
             <tr>
               <th>Name</th>
               <th>Type</th>
-              <th>Freshness</th>
               <th>Rows</th>
+              <th>Grain</th>
             </tr>
           </thead>
           <tbody>
-            {topic.dataSources.map((source) => (
-              <tr key={source.id}>
-                <td>
-                  <strong>{source.name}</strong>
-                  <span>{source.description}</span>
-                </td>
-                <td>{source.sourceType}</td>
-                <td>{source.freshness}</td>
-                <td>{source.rowCountLabel}</td>
-              </tr>
-            ))}
+            {topic.dataSources.map((source) => {
+              const schema = source.tableName ? schemaByTable[source.tableName] : undefined;
+
+              return (
+                <tr key={source.id}>
+                  <td>
+                    <strong>{source.name}</strong>
+                    <span>{source.description}</span>
+                  </td>
+                  <td>{source.sourceType}</td>
+                  <td>
+                    <strong>{source.rowCountLabel}</strong>
+                    <span>{source.freshness}</span>
+                  </td>
+                  <td>{schema?.grain ?? "Documentation or demo source"}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
     </section>
   );
 }
-
