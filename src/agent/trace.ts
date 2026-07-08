@@ -1,4 +1,10 @@
-import type { AgentTrace, AgentTraceEvent, QueryValue } from "./types";
+import type {
+  AgentTrace,
+  AgentTraceEvent,
+  AgentTraceStep,
+  AgentTraceStepStatus,
+  QueryValue
+} from "./types";
 
 function nowIso() {
   return new Date().toISOString();
@@ -47,3 +53,19 @@ export function completeTrace(trace: AgentTrace): AgentTrace {
   };
 }
 
+export function createTraceStep(
+  index: number,
+  label: string,
+  status: AgentTraceStepStatus,
+  message: string,
+  details?: AgentTraceStep["details"]
+): AgentTraceStep {
+  return {
+    id: `${index}`.padStart(2, "0"),
+    label,
+    status,
+    message,
+    details,
+    timestamp: nowIso()
+  };
+}

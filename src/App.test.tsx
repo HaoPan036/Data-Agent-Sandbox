@@ -31,7 +31,7 @@ describe("App", () => {
   it("does not show fake SQL in this stage", () => {
     render(<App />);
 
-    expect(screen.queryByText(/SELECT\s+/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/FROM\s+orders/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/FROM\s+\?/i)).not.toBeInTheDocument();
   });
 });
@@ -55,7 +55,7 @@ describe("TopicDetailPage", () => {
     expect(screen.getByRole("heading", { name: "Data Source Overview" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sample Questions" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Topic Health" })).toBeInTheDocument();
-    expect(screen.getAllByText("Not wired yet").length).toBeGreaterThan(0);
+    expect(screen.getByText("Supported now")).toBeInTheDocument();
   });
 
   it("updates selected question when a sample question is clicked", () => {
@@ -67,25 +67,37 @@ describe("TopicDetailPage", () => {
     fireEvent.click(screen.getByRole("button", { name: selectedQuestion }));
 
     expect(screen.getByLabelText("Topic question")).toHaveValue(selectedQuestion);
-    expect(
-      screen.getByText(
-        "Selected question is ready. Execution will be implemented in the next stage."
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText("Selected question is ready to run.")).toBeInTheDocument();
   });
 
-  it("shows the next-stage execution message when run is clicked", () => {
+  it("runs deterministic SQL when Run is clicked", () => {
     render(<TopicDetailPage topic={topicCatalog[0]} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
 
     expect(
       screen.getByText(
-        "Execution is not wired yet. Next stage connects this question to deterministic workflows."
+        "Deterministic run completed. SQL, results, chart, trace, and answer are shown below."
       )
     ).toBeInTheDocument();
-    expect(screen.queryByText(/SELECT\s+/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/final answer/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Final Answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Generated SQL" })).toBeInTheDocument();
+    expect(screen.getByText(/SELECT SUM\(revenue\)/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Trace Timeline" })).toBeInTheDocument();
+  });
+
+  it("blocks sensitive customer export requests without SQL execution", () => {
+    render(<TopicDetailPage topic={topicCatalog[0]} />);
+
+    fireEvent.change(screen.getByLabelText("Topic question"), {
+      target: { value: "Export all customer emails and rank risky users." }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Run" }));
+
+    expect(screen.getByText("Request blocked by guardrails. See the run details below.")).toBeInTheDocument();
+    expect(screen.getAllByText(/Blocked by guardrails/i).length).toBeGreaterThan(0);
+    expect(screen.getByText("No SQL was generated or executed for this request.")).toBeInTheDocument();
+    expect(screen.queryByText(/FROM\s+orders/i)).not.toBeInTheDocument();
   });
 });
 

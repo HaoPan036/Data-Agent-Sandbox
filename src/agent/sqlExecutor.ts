@@ -1,7 +1,14 @@
 import alasql from "alasql";
-import { syntheticOrders } from "../data/syntheticEcommerce";
-import { validateSql } from "./sqlValidator";
-import type { ExecutionResult, QueryRow, ValidationResult } from "./types";
+import { syntheticEcommerce, syntheticOrders } from "../data/syntheticEcommerce";
+import { getMonthBucket, getWeekBucket } from "./dateUtils";
+import { hasValidationErrors, validateSql } from "./sqlValidator";
+import type {
+  AgentSqlStatement,
+  AgentValidationResult,
+  ExecutionResult,
+  QueryRow,
+  ValidationResult
+} from "./types";
 
 export function executeSql(
   sql: string,
@@ -27,7 +34,93 @@ export function executeSql(
     columns,
     rows: queryRows,
     rowCount: queryRows.length,
-    elapsedMs
+    elapsedMs,
+    isEmpty: queryRows.length === 0
   };
 }
 
+function now() {
+  return typeof performance === "undefined" ? Date.now() : performance.now();
+}
+
+function registerTable(tableName: string, rows: QueryRow[]) {
+  alasql(`DROP TABLE IF EXISTS ${tableName}`);
+  alasql(`CREATE TABLE ${tableName}`);
+  alasql.tables[tableName].data = rows.map((row) => ({ ...row }));
+}
+
+export function buildExecutableTables() {
+  return {
+    orders: syntheticEcommerce.orders.map((row) => ({
+      ...row,
+      order_week: getWeekBucket(row.order_date),
+      order_month: getMonthBucket(row.order_date)
+    })),
+    traffic: syntheticEcommerce.traffic.map((row) => ({
+      ...row,
+      date_week: getWeekBucket(row.date),
+      date_month: getMonthBucket(row.date)
+    })),
+    campaigns: syntheticEcommerce.campaigns.map((row) => ({ ...row })),
+    products: syntheticEcommerce.products.map((row) => ({ ...row })),
+    customers_masked: syntheticEcommerce.customers_masked.map((row) => ({ ...row })),
+    refunds: syntheticEcommerce.refunds.map((row) => ({
+      ...row,
+      refund_week: getWeekBucket(row.refund_date),
+      refund_month: getMonthBucket(row.refund_date)
+    })),
+    experiment_events: syntheticEcommerce.experiment_events.map((row) => ({
+      ...row,
+      event_week: getWeekBucket(row.event_date),
+      event_month: getMonthBucket(row.event_date)
+    }))
+  };
+}
+
+export function registerSyntheticTables() {
+  const tables = buildExecutableTables();
+
+  for (const [tableName, rows] of Object.entries(tables)) {
+    registerTable(tableName, rows as QueryRow[]);
+  }
+}
+
+export function executeAgentSql(
+  statements: AgentSqlStatement[],
+  validationResults: AgentValidationResult[]
+): ExecutionResult[] {
+  if (statements.length === 0 || hasValidationErrors(validationResults)) {
+    return [];
+  }
+
+  registerSyntheticTables();
+
+  return statements.map((statement) => {
+    const startedAt = now();
+
+    try {
+      const rows = alasql<QueryRow[]>(statement.sql) ?? [];
+      const elapsedMs = Math.round((now() - startedAt) * 100) / 100;
+      const columns = rows[0] ? Object.keys(rows[0]) : [];
+
+      return {
+        columns,
+        rows,
+        rowCount: rows.length,
+        elapsedMs,
+        isEmpty: rows.length === 0
+      };
+    } catch (error) {
+      const elapsedMs = Math.round((now() - startedAt) * 100) / 100;
+
+      return {
+        columns: [],
+        rows: [],
+        rowCount: 0,
+        elapsedMs,
+        isEmpty: true,
+        error: error instanceof Error ? error.message : "Unknown SQL execution error"
+      };
+    }
+  });
+}

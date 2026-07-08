@@ -2,18 +2,23 @@ interface SampleQuestionListProps {
   onSelectQuestion: (question: string) => void;
   questions: string[];
   selectedQuestion: string;
+  supportedLabel?: string;
 }
 
 export function SampleQuestionList({
   onSelectQuestion,
   questions,
-  selectedQuestion
+  selectedQuestion,
+  supportedLabel
 }: SampleQuestionListProps) {
   return (
     <section className="sample-question-panel" id="sample-questions">
       <div>
         <h2>Sample Questions</h2>
-        <p>Choose a prompt to prepare the composer. Execution comes in the next stage.</p>
+        <p>
+          Choose a prompt to prepare the composer.
+          {supportedLabel ? <strong> {supportedLabel}</strong> : null}
+        </p>
       </div>
       <div className="sample-chip-row">
         {questions.map((question) => (

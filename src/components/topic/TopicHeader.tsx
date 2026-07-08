@@ -22,10 +22,13 @@ export function TopicHeader({ topic }: TopicHeaderProps) {
         <p>{topic.description}</p>
       </div>
       <div className="topic-header__meta">
-        <span>Semantic model and topic layer implemented</span>
-        <strong>Deterministic execution coming next</strong>
+        <span>Semantic model, validation, and local execution</span>
+        <strong>
+          {topic.id === "knowledge-base-demo"
+            ? "Knowledge retrieval planned"
+            : "Deterministic SQL live"}
+        </strong>
       </div>
     </section>
   );
 }
-

@@ -91,6 +91,8 @@ export interface ExecutionResult {
   rows: QueryRow[];
   rowCount: number;
   elapsedMs: number;
+  isEmpty?: boolean;
+  error?: string;
 }
 
 export interface AgentTraceEvent {
@@ -120,3 +122,83 @@ export interface DemoAnswer {
   reportHtml: string;
 }
 
+export type AgentIntent =
+  | "metric_lookup"
+  | "metric_comparison"
+  | "trend_analysis"
+  | "diagnostic_analysis"
+  | "campaign_review"
+  | "experiment_analysis"
+  | "data_completeness_check"
+  | "governance_sensitive_request"
+  | "unknown";
+
+export type AgentRunStatus = "idle" | "running" | "completed" | "blocked" | "failed";
+export type ValidationSeverity = "info" | "warning" | "error";
+export type GuardrailDecision = "allowed" | "blocked" | "needs_review";
+export type AgentTraceStepStatus = "completed" | "blocked" | "failed" | "warning";
+
+export interface AgentTraceStep {
+  id: string;
+  label: string;
+  status: AgentTraceStepStatus;
+  message: string;
+  details?: Record<string, QueryValue | QueryValue[] | string[] | number[] | boolean[]>;
+  timestamp: string;
+}
+
+export interface AgentSqlStatement {
+  id: string;
+  title: string;
+  sql: string;
+}
+
+export interface AgentSqlPlan {
+  statements: AgentSqlStatement[];
+  selectedMetrics: string[];
+  selectedTables: string[];
+  warnings: string[];
+  suggestedFollowUps: string[];
+}
+
+export interface AgentValidationResult {
+  id: string;
+  severity: ValidationSeverity;
+  message: string;
+  passed: boolean;
+  details?: Record<string, QueryValue | QueryValue[] | string[]>;
+}
+
+export interface AgentChartSpec {
+  type: "kpi" | "bar" | "line" | "table" | "status";
+  title: string;
+  xKey: string;
+  yKeys: string[];
+  seriesKey?: string;
+  data: QueryRow[];
+}
+
+export interface AgentRun {
+  runId: string;
+  status: AgentRunStatus;
+  topicId: string;
+  userQuestion: string;
+  intent: AgentIntent;
+  selectedMetrics: string[];
+  selectedTables: string[];
+  generatedSql: AgentSqlStatement[];
+  validationResults: AgentValidationResult[];
+  executionResult: ExecutionResult[];
+  chartSpec?: AgentChartSpec;
+  traceSteps: AgentTraceStep[];
+  warnings: string[];
+  guardrailDecision: GuardrailDecision;
+  finalAnswer: string;
+  suggestedFollowUps: string[];
+  createdAt: string;
+}
+
+export interface AgentRunOptions {
+  runId?: string;
+  createdAt?: string;
+}

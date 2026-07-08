@@ -1,6 +1,6 @@
 # 系统架构
 
-Data Agent Sandbox 是一个纯浏览器的公开 AI 辅助分析治理平台模拟项目。当前阶段聚焦产品外壳、Topic 层、语义模型、指标目录、知识库和合成数据基础。
+Data Agent Sandbox 是一个纯浏览器的公开 AI 辅助分析治理平台模拟项目。当前阶段已经把公共产品外壳接入基于合成数据的确定性 BI Agent 执行链路。
 
 ## UI Shell
 
@@ -11,7 +11,7 @@ React 外壳包含：
 - Overview 页面：hero 区域、平台能力卡片和 Topic 卡片。
 - Topic 详情页：信息、摘要、数据源、术语表、示例问题、右侧目录和底部输入框。
 
-当前输入框还不执行分析，只保存本地问题状态，并显示下一阶段实现执行的提示。
+输入框会把已支持的 Retail Growth Demo 和 Experiment Metrics Demo 问题交给确定性 agent runner 执行。Knowledge Base Demo 当前仍是 metadata-only。
 
 ## Topic 层
 
@@ -45,7 +45,20 @@ React 外壳包含：
 
 `src/agent/knowledgeBase.ts` 保存公开通用知识条目，覆盖指标定义、实验对比、活动基线、最新周完整性、因果表述谨慎、敏感数据政策和歧义处理。
 
-## 未来 Agent 执行层
+## Agent 执行层
 
-下一阶段可以把选中的 Topic 问题连接到意图路由、SQL 生成、SQL 校验、本地执行、trace、evaluation 和可编辑报告。当前阶段刻意避免在新 Topic UI 中伪造 SQL 或最终答案。
+`src/agent/runAgent.ts` 负责编排确定性链路：
 
+- `intentRouter.ts` 对已支持问题和敏感请求做分类。
+- `sqlGenerator.ts` 选择指标、表和只读 SQL 模板。
+- `sqlValidator.ts` 校验表、字段、只读 SQL、显式字段、日期过滤和敏感字段选择。
+- `sqlExecutor.ts` 在 AlaSQL 中注册合成表，并在本地执行已校验 SQL。
+- `chartSpec.ts` 把执行结果映射成图表规格。
+- `answerGenerator.ts` 基于执行结果和 warnings 生成有依据的回答。
+- `trace.ts` 记录可审查的 step-level trace。
+
+UI 会展示 final answer、intent、selected metrics、selected tables、SQL、validation results、result rows、chart preview、trace timeline、warnings、guardrail decision 和 suggested follow-ups。
+
+## 下一层
+
+下一层是 evaluation dashboard 和 bad-case review，之后继续扩展可编辑报告，并仅在用户显式配置 API key 后增加可选 LLM 集成。

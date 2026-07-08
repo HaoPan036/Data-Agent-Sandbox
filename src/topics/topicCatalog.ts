@@ -107,7 +107,7 @@ export const topicCatalog: Topic[] = [
       { id: "retail-session-3", title: "Campaign C001 baseline", createdAt: "2026-07-06", status: "Evaluated" }
     ],
     governanceStatus: {
-      sqlValidation: "Planned",
+      sqlValidation: "Ready",
       sensitiveDataPolicy: "Ready",
       evaluation: "Planned",
       reportReview: "Planned"
@@ -153,7 +153,7 @@ export const topicCatalog: Topic[] = [
       { id: "experiment-session-3", title: "GMV and active users trend", createdAt: "2026-07-05", status: "Evaluated" }
     ],
     governanceStatus: {
-      sqlValidation: "Planned",
+      sqlValidation: "Ready",
       sensitiveDataPolicy: "Ready",
       evaluation: "Planned",
       reportReview: "Planned"
@@ -217,4 +217,3 @@ export const topicCatalog: Topic[] = [
 export function getTopicById(topicId: string) {
   return topicCatalog.find((topic) => topic.id === topicId);
 }
-

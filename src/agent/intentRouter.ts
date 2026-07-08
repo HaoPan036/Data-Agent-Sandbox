@@ -1,4 +1,4 @@
-import type { QuestionIntent, SupportedIntentId } from "./types";
+import type { AgentIntent, QuestionIntent, SupportedIntentId } from "./types";
 
 interface IntentRule {
   id: SupportedIntentId;
@@ -73,3 +73,146 @@ export function routeIntent(question: string): QuestionIntent {
   };
 }
 
+export interface AgentIntentRoute {
+  intent: AgentIntent;
+  confidence: number;
+  matchedRules: string[];
+  normalizedQuestion: string;
+}
+
+function hasAny(value: string, words: string[]) {
+  return words.some((word) => value.includes(word));
+}
+
+export function classifyIntent(question: string): AgentIntentRoute {
+  const normalizedQuestion = normalizeQuestion(question);
+  const matchedRules: string[] = [];
+
+  if (
+    hasAny(normalizedQuestion, [
+      "export all",
+      "customer email",
+      "customer emails",
+      "rank risky",
+      "risky users",
+      "ignore previous rules",
+      "select all customer",
+      "all customer records",
+      "customer records",
+      "personal data",
+      "user-level"
+    ])
+  ) {
+    matchedRules.push("sensitive-user-level-request");
+
+    return {
+      intent: "governance_sensitive_request",
+      confidence: 0.98,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  if (hasAny(normalizedQuestion, ["complete data", "completeness", "latest week complete"])) {
+    matchedRules.push("latest-week-completeness");
+
+    return {
+      intent: "data_completeness_check",
+      confidence: 0.94,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  if (hasAny(normalizedQuestion, ["campaign", "c001", "performance review"])) {
+    matchedRules.push("campaign-review");
+
+    return {
+      intent: "campaign_review",
+      confidence: 0.94,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  if (
+    hasAny(normalizedQuestion, [
+      "experiment",
+      "variant",
+      "variants",
+      "checkout abandonment",
+      "revenue per session",
+      "funnel conversion"
+    ])
+  ) {
+    matchedRules.push("experiment-analysis");
+
+    return {
+      intent: "experiment_analysis",
+      confidence: 0.92,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  if (hasAny(normalizedQuestion, ["why", "drop", "decline", "driver", "diagnostic"])) {
+    matchedRules.push("diagnostic");
+
+    return {
+      intent: "diagnostic_analysis",
+      confidence: 0.9,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  if (
+    hasAny(normalizedQuestion, [
+      "trend",
+      "trends",
+      "daily",
+      "weekly",
+      "over the last",
+      "last 30 days",
+      "last 8 weeks"
+    ])
+  ) {
+    matchedRules.push("trend");
+
+    return {
+      intent: "trend_analysis",
+      confidence: 0.9,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  if (hasAny(normalizedQuestion, ["highest", "compare", "comparison", "which product category"])) {
+    matchedRules.push("comparison");
+
+    return {
+      intent: "metric_comparison",
+      confidence: 0.88,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  if (hasAny(normalizedQuestion, ["total revenue", "what was", "last week"])) {
+    matchedRules.push("metric-lookup");
+
+    return {
+      intent: "metric_lookup",
+      confidence: 0.86,
+      matchedRules,
+      normalizedQuestion
+    };
+  }
+
+  return {
+    intent: "unknown",
+    confidence: 0.2,
+    matchedRules,
+    normalizedQuestion
+  };
+}

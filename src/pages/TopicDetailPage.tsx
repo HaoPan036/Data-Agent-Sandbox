@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { runAgent } from "../agent/runAgent";
+import type { AgentRun } from "../agent/types";
+import { ExecutionResultPanel } from "../components/execution/ExecutionResultPanel";
 import { ChatComposer } from "../components/layout/ChatComposer";
 import { RightContents } from "../components/layout/RightContents";
 import { DataSourceOverview } from "../components/topic/DataSourceOverview";
@@ -16,21 +19,40 @@ interface TopicDetailPageProps {
   topic: Topic;
 }
 
-const contents = ["Information", "Summary", "Data Sources", "Glossary", "Sample Questions"];
+const contents = ["Information", "Summary", "Data Sources", "Glossary", "Sample Questions", "Execution"];
+
+function supportedLabel(topicId: string) {
+  if (topicId === "retail-growth-demo") {
+    return "Supported now: Retail 5.";
+  }
+
+  if (topicId === "experiment-metrics-demo") {
+    return "Supported now: Experiment 5.";
+  }
+
+  return "Knowledge base retrieval execution is planned for a later stage.";
+}
 
 export function TopicDetailPage({ topic }: TopicDetailPageProps) {
   const [selectedQuestion, setSelectedQuestion] = useState(topic.sampleQuestions[0] ?? "");
   const [message, setMessage] = useState("");
+  const [agentRun, setAgentRun] = useState<AgentRun | undefined>();
 
   function handleRun() {
+    const run = runAgent(selectedQuestion, topic.id);
+    setAgentRun(run);
     setMessage(
-      "Execution is not wired yet. Next stage connects this question to deterministic workflows."
+      run.status === "blocked"
+        ? "Request blocked by guardrails. See the run details below."
+        : run.generatedSql.length === 0
+          ? "No executable SQL workflow matched this request. See suggestions below."
+        : "Deterministic run completed. SQL, results, chart, trace, and answer are shown below."
     );
   }
 
   function handleSkills() {
     setMessage(
-      "Reusable Skills are documented in the topic layer. Execution wiring comes next."
+      "Reusable Skills are represented in the topic layer. The deterministic runner now uses local SQL templates and public metric metadata."
     );
   }
 
@@ -55,12 +77,11 @@ export function TopicDetailPage({ topic }: TopicDetailPageProps) {
         <SampleQuestionList
           onSelectQuestion={(question) => {
             setSelectedQuestion(question);
-            setMessage(
-              "Selected question is ready. Execution will be implemented in the next stage."
-            );
+            setMessage("Selected question is ready to run.");
           }}
           questions={topic.sampleQuestions}
           selectedQuestion={selectedQuestion}
+          supportedLabel={supportedLabel(topic.id)}
         />
 
         <ChatComposer
@@ -73,14 +94,16 @@ export function TopicDetailPage({ topic }: TopicDetailPageProps) {
           onRun={handleRun}
           value={selectedQuestion}
         />
+
+        {agentRun ? <ExecutionResultPanel run={agentRun} /> : null}
       </div>
 
       <aside className="topic-right-rail">
         <RightContents items={contents} />
         <TopicHealthCard topic={topic} />
-        <EmptyState title="Next Stage">
-          Sample questions will wire into intent routing, SQL planning, validation,
-          local execution, trace logging, and grounded answers.
+        <EmptyState title="Execution Coverage">
+          Retail Growth Demo and Experiment Metrics Demo execute deterministic SQL locally.
+          Knowledge Base Demo remains metadata-only in this stage.
         </EmptyState>
       </aside>
     </div>

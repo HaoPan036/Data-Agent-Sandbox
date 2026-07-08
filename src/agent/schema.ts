@@ -14,6 +14,8 @@ function columnTypes(definitions: TableColumn[]) {
 const ordersColumns = columns([
   { name: "order_id", type: "string", description: "Synthetic order identifier." },
   { name: "order_date", type: "string", description: "Date when the synthetic order was placed." },
+  { name: "order_week", type: "string", description: "Derived week bucket for synthetic order date." },
+  { name: "order_month", type: "string", description: "Derived month bucket for synthetic order date." },
   { name: "customer_id", type: "string", description: "Masked synthetic customer identifier." },
   { name: "product_id", type: "string", description: "Synthetic product identifier." },
   { name: "region", type: "string", description: "Generic market region." },
@@ -27,6 +29,8 @@ const ordersColumns = columns([
 
 const trafficColumns = columns([
   { name: "date", type: "string", description: "Synthetic traffic date." },
+  { name: "date_week", type: "string", description: "Derived week bucket for synthetic traffic date." },
+  { name: "date_month", type: "string", description: "Derived month bucket for synthetic traffic date." },
   { name: "region", type: "string", description: "Generic market region." },
   { name: "channel", type: "string", description: "Generic acquisition channel." },
   { name: "sessions", type: "number", description: "Synthetic sessions." },
@@ -71,12 +75,16 @@ const refundsColumns = columns([
   { name: "refund_id", type: "string", description: "Synthetic refund identifier." },
   { name: "order_id", type: "string", description: "Synthetic order identifier." },
   { name: "refund_date", type: "string", description: "Synthetic refund date." },
+  { name: "refund_week", type: "string", description: "Derived week bucket for synthetic refund date." },
+  { name: "refund_month", type: "string", description: "Derived month bucket for synthetic refund date." },
   { name: "refund_amount", type: "number", description: "Synthetic refunded amount." },
   { name: "refund_reason", type: "string", description: "Generic refund reason." }
 ]);
 
 const experimentColumns = columns([
   { name: "event_date", type: "string", description: "Synthetic experiment event date." },
+  { name: "event_week", type: "string", description: "Derived week bucket for synthetic experiment date." },
+  { name: "event_month", type: "string", description: "Derived month bucket for synthetic experiment date." },
   { name: "experiment_id", type: "string", description: "Generic experiment identifier." },
   { name: "variant", type: "string", description: "Experiment variant." },
   { name: "region", type: "string", description: "Generic market region." },
@@ -241,6 +249,14 @@ export const schemaColumnNames = Array.from(
   new Set([
     ...schemaCatalog.flatMap((schema) => schema.columns.map((column) => column.name)),
     "orderMonth",
+    "order_week",
+    "order_month",
+    "date_week",
+    "date_month",
+    "refund_week",
+    "refund_month",
+    "event_week",
+    "event_month",
     "cost",
     "units",
     "returned"
@@ -250,4 +266,3 @@ export const schemaColumnNames = Array.from(
 export const sensitiveColumnNames = Array.from(
   new Set(schemaCatalog.flatMap((schema) => schema.sensitiveColumns))
 );
-

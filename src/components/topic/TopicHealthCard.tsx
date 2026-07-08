@@ -7,11 +7,25 @@ interface TopicHealthCardProps {
   topic: Topic;
 }
 
+function supportStatus(topicId: string) {
+  if (topicId === "retail-growth-demo") {
+    return { label: "Retail 5", status: "Ready", tone: "ready" as const };
+  }
+
+  if (topicId === "experiment-metrics-demo") {
+    return { label: "Experiment 5", status: "Ready", tone: "ready" as const };
+  }
+
+  return { label: "Knowledge planned", status: "Planned", tone: "planned" as const };
+}
+
 export function TopicHealthCard({ topic }: TopicHealthCardProps) {
+  const support = supportStatus(topic.id);
   const items = [
     ["Data sources", String(topic.dataSources.length)],
     ["Glossary terms", String(topic.glossary.length)],
     ["Sample questions", String(topic.sampleQuestions.length)],
+    ["Supported now", support.label],
     ["Sensitive fields marked", sensitiveColumnNames.length > 0 ? "Yes" : "No"]
   ];
 
@@ -19,7 +33,7 @@ export function TopicHealthCard({ topic }: TopicHealthCardProps) {
     <Card className="topic-health-card">
       <div className="panel__heading">
         <h2>Topic Health</h2>
-        <StatusPill tone="planned">Not wired yet</StatusPill>
+        <StatusPill tone={support.tone}>{support.status}</StatusPill>
       </div>
       <dl>
         {items.map(([label, value]) => (
@@ -30,10 +44,9 @@ export function TopicHealthCard({ topic }: TopicHealthCardProps) {
         ))}
         <div>
           <dt>Execution status</dt>
-          <dd>Not wired yet</dd>
+          <dd>{support.status}</dd>
         </div>
       </dl>
     </Card>
   );
 }
-

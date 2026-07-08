@@ -2,7 +2,7 @@
 
 ## What This Project Is
 
-Data Agent Sandbox is a public, runnable simulation of an AI assisted analysis governance platform. It demonstrates how a data agent platform can organize topics, semantic models, metric catalogs, knowledge base entries, sample questions, governance state, and later deterministic agent workflows.
+Data Agent Sandbox is a public, runnable simulation of an AI assisted analysis governance platform. It demonstrates how a small BI data agent turns natural language business questions into deterministic intent routing, validated SQL, local execution results, charts, trace timelines, warnings, guardrail decisions, and grounded answers.
 
 This project uses synthetic or public data only. It does not contain internal company data, code, prompts, schemas, screenshots, business metrics, roadmap details, or proprietary workflows.
 
@@ -14,21 +14,24 @@ The project answers a simple question: can a small BI data-agent workflow be mad
 
 - Vite, React, TypeScript, Vitest, Recharts, and AlaSQL setup.
 - Public platform shell with left navigation, recent sessions, available topics, top actions, topic detail pages, contents rail, sample question chips, and bottom composer.
-- Portfolio-ready UI polish with a compact hero, lifecycle preview, topic health metadata, and clearer next-stage labels.
+- Portfolio-ready UI polish with a compact hero, lifecycle preview, topic health metadata, and execution coverage labels.
+- Deterministic execution for 5 Retail Growth Demo questions and 5 Experiment Metrics Demo questions.
+- Local SQL validation and AlaSQL execution against synthetic browser tables.
+- Result panels with grounded answer, selected intent, selected metrics, selected tables, generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
+- Guardrails that block sensitive customer export or user-level record requests before SQL generation.
 - Synthetic ecommerce, traffic, campaign, product, masked customer, refund, and experiment event tables.
 - Semantic schema metadata, metric catalog, topic catalog, and lightweight knowledge base.
-- Deterministic local test coverage for data, topics, schema, metrics, knowledge entries, and pages.
+- Deterministic local test coverage for data, topics, schema, metrics, knowledge entries, SQL generation, SQL validation, SQL execution, agent runs, and pages.
 
 ## What This Stage Adds
 
-This stage adds the first public product shell and data foundation:
+This stage adds the deterministic execution chain:
 
-- Multi-table synthetic ecommerce data over 186 days.
-- A known revenue drop period, refund spike period, and incomplete latest week scenario.
-- Schema metadata with grain, date columns, allowed joins, sensitive columns, and sample questions.
-- A governed metric catalog with formulas, source tables, required columns, dimensions, caveats, and sensitivity levels.
-- Public knowledge base entries for definitions, caveats, baselines, causal caution, and sensitive data policy.
-- Three demo topics with data sources, glossary items, sample questions, and recent sessions.
+- Question to topic context, intent classification, metric selection, SQL generation, SQL validation, local SQL execution, chart-ready data, trace timeline, grounded answer, warnings, and guardrail decision.
+- Retail Growth Demo support for total revenue, refund-rate comparison, weekly revenue trend, revenue-drop diagnostic, and campaign C001 review.
+- Experiment Metrics Demo support for GMV and active users trend, regional funnel conversion, checkout abandonment by variant, revenue per session by variant, and latest-week completeness.
+- Governance support for blocking sensitive export and unsafe customer-record prompts.
+- Knowledge Base Demo remains metadata-only; retrieval execution is planned for a later stage.
 
 ## Public Platform Layout
 
@@ -36,7 +39,7 @@ The layout is an original public portfolio version inspired by common analytics 
 
 ## Visual Product Shell Status
 
-The current version implements the public product shell, synthetic topic layer, semantic model, metric catalog, knowledge base, and portfolio ready UI. Query execution is intentionally deferred to the next stage to avoid fake outputs.
+The current version implements the public product shell, synthetic topic layer, semantic model, metric catalog, knowledge base, deterministic SQL execution, validation, traces, charts, answers, and guardrails. The demo does not fake SQL, traces, charts, answers, or evaluation output.
 
 ## Synthetic Topics
 
@@ -66,13 +69,13 @@ The catalog includes revenue, orders, average order value, refund amount, refund
 
 The knowledge layer stores public, generic entries for metric definitions, experiment comparison, campaign baselines, latest week completeness, causal claim caution, sensitive data policy, and ambiguity handling.
 
-## Why Execution Is Not Implemented Yet
+## Deterministic Execution Status
 
-This stage intentionally focuses on the topic platform shell and semantic foundation. Clicking a sample question or Run updates local UI state and clearly says execution is not wired yet. It does not fake SQL, answers, charts, traces, or final analysis for topic questions.
+Clicking a supported Retail Growth Demo or Experiment Metrics Demo sample question and then Run executes the deterministic workflow locally. Unsupported questions return suggestions. Sensitive customer export prompts are blocked before SQL generation.
 
-## Next Stage: Deterministic Agent Workflows
+## Next Stage: Evaluation Dashboard And Bad Case Review
 
-The next stage can connect selected topic questions to deterministic routing, SQL generation, SQL validation, local execution, trace review, evaluation, and editable reports.
+The next stage can add an evaluation dashboard, bad-case review, richer editable report workflows, and public report export. Optional LLM integration should remain behind explicit API-key configuration.
 
 ## Architecture
 
@@ -99,17 +102,16 @@ This project uses synthetic or public data only. It does not contain internal co
 
 ## Roadmap
 
-- Connect topic sample questions to deterministic agent workflows.
-- Expand SQL validation and sensitive-data guardrails.
-- Add trace review and evaluation views to the new shell.
-- Add report export and editable review states.
+- Add evaluation dashboard and bad-case review.
+- Expand report editing and export.
+- Strengthen SQL parsing and validation edge cases.
 - Add optional LLM integration only behind explicit API-key configuration.
 
 # Data Agent Sandbox 中文说明
 
 ## 项目简介
 
-Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟项目。它展示数据 Agent 平台如何组织 Topic、语义模型、指标目录、知识库、示例问题、治理状态，以及后续的确定性 Agent 工作流。
+Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟项目。它展示一个小型 BI Data Agent 如何把自然语言业务问题转换为确定性 intent、经过校验的 SQL、本地执行结果、图表、trace、warning、guardrail decision 和有依据的回答。
 
 本项目只使用合成数据或公开数据，不包含任何内部公司数据、代码、提示词、schema、截图、业务指标、路线图细节或专有工作流。
 
@@ -121,20 +123,23 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 
 - Vite、React、TypeScript、Vitest、Recharts 和 AlaSQL 基础工程。
 - 公共版平台外壳：左侧导航、最近会话、可用 Topics、顶部操作、Topic 详情页、右侧目录、示例问题 chips、底部输入框。
+- Retail Growth Demo 的 5 个问题和 Experiment Metrics Demo 的 5 个问题已经接入确定性执行。
+- 在浏览器内使用 AlaSQL 对合成表进行本地 SQL 校验和执行。
+- 结果面板展示 final answer、intent、指标、数据表、SQL、validation、结果行、chart、trace、warning、guardrail decision 和 follow-up。
+- 对导出客户邮箱、选择所有客户记录等敏感请求，会在 SQL 生成前阻断。
 - 合成订单、流量、活动、商品、脱敏客户、退款、实验事件数据表。
 - 语义 schema、指标目录、Topic 目录和轻量知识库。
-- 针对数据、Topic、schema、指标、知识库和页面的本地测试。
+- 针对数据、Topic、schema、指标、知识库、SQL 生成、SQL 校验、SQL 执行、agent run 和页面的本地测试。
 
 ## 本阶段新增内容
 
-本阶段新增第一版公共产品外壳与数据基础：
+本阶段新增确定性执行链路：
 
-- 覆盖 186 天的多表合成电商数据。
-- 已知收入下跌区间、退款峰值区间和最新周不完整场景。
-- 包含粒度、默认日期列、允许 join、敏感字段和示例问题的 schema 元数据。
-- 包含公式、来源表、必需字段、维度、注意事项和敏感等级的指标目录。
-- 关于指标定义、实验对比、活动基线、最新周完整性、因果表述谨慎、敏感数据政策和歧义处理的公共知识库。
-- 三个演示 Topic，并包含数据源、术语表、示例问题和最近会话。
+- question 到 topic context、intent classification、metric selection、SQL generation、SQL validation、本地 SQL execution、chart-ready data、trace timeline、grounded answer、warnings 和 guardrail decision。
+- Retail Growth Demo 支持总收入、退款率对比、周收入趋势、收入下跌诊断和 C001 活动复盘。
+- Experiment Metrics Demo 支持 GMV/active users 趋势、区域漏斗转化、变体 checkout abandonment、变体 revenue per session 和最新周完整性检查。
+- Governance 支持阻断敏感导出和不安全的客户记录请求。
+- Knowledge Base Demo 当前仍是 metadata-only，知识检索执行会在后续阶段接入。
 
 ## 公共版平台布局
 
@@ -168,17 +173,17 @@ schema 层定义了所有公开合成数据表：
 
 知识层保存公开、通用的指标定义、实验对比、活动基线、最新周完整性、因果表述谨慎、敏感数据政策和歧义处理说明。
 
-## 为什么本阶段还不执行查询
+## 确定性执行状态
 
-本阶段刻意聚焦 Topic 平台外壳和语义基础。点击示例问题或 Run 只会更新本地 UI 状态，并明确提示执行尚未接入。本阶段不会为 Topic 问题伪造 SQL、答案、图表、Trace 或最终分析。
+点击 Retail Growth Demo 或 Experiment Metrics Demo 的已支持示例问题，再点击 Run，会在本地执行确定性工作流。暂不支持的问题会返回建议问题。敏感客户导出请求会在 SQL 生成前被阻断。
 
-## 下一阶段：确定性 Agent 工作流
+## 下一阶段：评测看板和 bad case review
 
-下一阶段可以把选中的 Topic 问题连接到确定性路由、SQL 生成、SQL 校验、本地执行、trace review、evaluation 和可编辑报告。
+下一阶段可以增加 evaluation dashboard、bad-case review、更完整的可编辑报告流程和公开报告导出。可选 LLM 集成仍应放在用户显式配置 API key 之后。
 
 ## 视觉产品外壳状态
 
-当前版本实现了公共版产品外壳、合成 Topic 层、语义模型、指标目录、知识库和适合作品集展示的 UI。查询执行会在下一阶段接入，本阶段不伪造 SQL、Trace 或回答。
+当前版本实现了公共版产品外壳、合成 Topic 层、语义模型、指标目录、知识库、确定性 SQL 执行、校验、trace、图表、回答和 guardrails。Demo 不伪造 SQL、trace、图表、回答或评测结果。
 
 ## 系统架构
 
@@ -207,8 +212,7 @@ English boundary statement: This project uses synthetic or public data only. It 
 
 ## 路线图
 
-- 将 Topic 示例问题连接到确定性 Agent 工作流。
-- 扩展 SQL 校验和敏感数据 guardrails。
-- 在新 shell 中增加 trace review 和 evaluation 视图。
-- 增加报告导出和可编辑 review 状态。
+- 增加 evaluation dashboard 和 bad-case review。
+- 扩展报告编辑和导出。
+- 强化 SQL 解析与校验边界场景。
 - 仅在用户显式配置 API key 后增加可选 LLM 集成。

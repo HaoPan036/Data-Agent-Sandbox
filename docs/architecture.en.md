@@ -1,6 +1,6 @@
 # Architecture
 
-Data Agent Sandbox is a browser-only public simulation of an AI assisted analysis governance platform. The current stage focuses on the product shell, topic layer, semantic model, metric catalog, knowledge base, and synthetic data foundation.
+Data Agent Sandbox is a browser-only public simulation of an AI assisted analysis governance platform. The current stage wires the public product shell into deterministic BI agent execution over synthetic data.
 
 ## UI Shell
 
@@ -11,7 +11,7 @@ The React shell includes:
 - Overview page with hero area, platform cards, and topic cards.
 - Topic detail page with information, summary, data sources, glossary, sample questions, right contents panel, and bottom composer.
 
-The composer does not execute analysis yet. It stores local question state and shows a next-stage message.
+The composer executes supported Retail Growth Demo and Experiment Metrics Demo questions through the deterministic agent runner. Knowledge Base Demo remains metadata-only in this stage.
 
 ## Topic Layer
 
@@ -45,7 +45,20 @@ The data includes at least 180 days, four public regions, four public channels, 
 
 `src/agent/knowledgeBase.ts` stores public generic knowledge entries for metric definitions, experiment comparison, campaign baselines, latest week completeness, causal claim caution, sensitive data policy, and ambiguity handling.
 
-## Future Agent Execution Layer
+## Agent Execution Layer
 
-The next deterministic layer can connect selected topic questions to intent routing, SQL generation, SQL validation, local execution, traces, evaluation, and editable reports. This stage intentionally avoids fake SQL or fake final answers in the new topic UI.
+`src/agent/runAgent.ts` orchestrates the deterministic chain:
 
+- `intentRouter.ts` classifies supported questions and sensitive prompts.
+- `sqlGenerator.ts` selects metrics, tables, and read-only SQL templates.
+- `sqlValidator.ts` checks table and column references, read-only SQL, explicit columns, date filters, and sensitive selections.
+- `sqlExecutor.ts` registers synthetic tables in AlaSQL and executes validated statements locally.
+- `chartSpec.ts` maps executed rows to chart-ready specs.
+- `answerGenerator.ts` writes grounded answers from execution results and warnings.
+- `trace.ts` records step-level trace events for review.
+
+The UI displays final answer, intent, selected metrics, selected tables, SQL, validation results, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
+
+## Next Layer
+
+The next layer is an evaluation dashboard and bad-case review workflow, followed by richer editable reports and optional LLM integration behind explicit API-key configuration.
