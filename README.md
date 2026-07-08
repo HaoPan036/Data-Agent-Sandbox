@@ -20,6 +20,7 @@ The project answers a simple question: can a small BI data-agent workflow be mad
 - Result panels with grounded answer, selected intent, selected metrics, selected tables, generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
 - Guardrails that block sensitive customer export or user-level record requests before SQL generation.
 - Evaluation Dashboard with versioned deterministic testsets, real AgentRun execution, pass or fail scoring, failure reasons, trace inspection, failure mode summaries, and local Bad Case Review Queue.
+- Screenshot Showcase route for portfolio-ready agent, guardrail, and evaluation frames.
 - Synthetic ecommerce, traffic, campaign, product, masked customer, refund, and experiment event tables.
 - Semantic schema metadata, metric catalog, topic catalog, and lightweight knowledge base.
 - Deterministic local test coverage for data, topics, schema, metrics, knowledge entries, SQL generation, SQL validation, SQL execution, agent runs, and pages.
@@ -41,6 +42,10 @@ The Overview page now exposes a one click deterministic demo. Supported question
 ## Evaluation Dashboard
 
 The Evaluation Dashboard runs versioned testsets through the real deterministic agent. Each case produces an AgentRun, deterministic pass or fail scoring, failure reasons, trace inspection, and optional local bad case review. No LLM judge is called in this version.
+
+## Screenshot Showcase
+
+The app includes a `/showcase` route for portfolio screenshots. The agent, guardrail, and evaluation views are generated from real deterministic execution and evaluation runs. Use `capture=true` to hide nonessential UI.
 
 ## Public Platform Layout
 
@@ -137,6 +142,7 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 - 结果面板展示 final answer、intent、指标、数据表、SQL、validation、结果行、chart、trace、warning、guardrail decision 和 follow-up。
 - 对导出客户邮箱、选择所有客户记录等敏感请求，会在 SQL 生成前阻断。
 - 评估面板支持版本化确定性测试集、真实 AgentRun 执行、pass 或 fail 评分、失败原因、Trace 检查、failure mode 汇总和本地 Bad Case Review Queue。
+- 新增作品集截图页面，提供 agent、guardrail 和 evaluation 三个截图视图。
 - 合成订单、流量、活动、商品、脱敏客户、退款、实验事件数据表。
 - 语义 schema、指标目录、Topic 目录和轻量知识库。
 - 针对数据、Topic、schema、指标、知识库、SQL 生成、SQL 校验、SQL 执行、agent run 和页面的本地测试。
@@ -158,6 +164,10 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 ## 评估面板
 
 评估面板会把版本化测试集跑过真实的确定性 agent。每个 case 都会生成 AgentRun、确定性 pass 或 fail、失败原因、Trace 检查和本地 Bad Case Review。本版本不调用 LLM judge。
+
+## 作品集截图页面
+
+项目新增 `/showcase` 路由，用于作品集截图。Agent、Guardrail 和 Evaluation 视图都来自真实的确定性执行和评估结果。使用 `capture=true` 可以隐藏非必要 UI。
 
 ## 公共版平台布局
 

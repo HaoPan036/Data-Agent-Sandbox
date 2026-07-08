@@ -11,6 +11,7 @@ React 外壳包含：
 - Overview 页面：hero 区域、平台能力卡片和 Topic 卡片。
 - Topic 详情页：信息、摘要、数据源、术语表、示例问题、右侧目录和底部输入框。
 - Evaluation 页面：版本化测试集选择、summary cards、failure mode distribution、case table、trace details 和本地 bad-case review queue。
+- Showcase 路由：提供 agent、guardrail 和 evaluation 的截图视图，全部来自真实确定性输出。
 
 输入框会把已支持的 Retail Growth Demo 和 Experiment Metrics Demo 问题交给确定性 agent runner 执行。Knowledge Base Demo 当前仍是 metadata-only。
 
@@ -65,6 +66,10 @@ UI 会展示 final answer、intent、selected metrics、selected tables、SQL、
 `src/evaluation/testset.ts` 定义公开的版本化回归测试集，覆盖核心 agent 行为和 governance 行为。`src/evaluation/evaluator.ts` 会把每个 case 跑过真实的确定性 `runAgent` 链路。`src/evaluation/scoringRules.ts` 用确定性规则评分，覆盖 intent、metrics、tables、SQL validation、execution、guardrails、warnings、grounded answers、trace completeness 和 blocked-request safety。
 
 评估面板不会调用 LLM judge 或外部 API。Bad Case Review Queue 只保存在本地 UI state 中。
+
+## 截图层
+
+`/showcase` 支持 `view=agent`、`view=guardrail` 和 `view=evaluation`。这些视图会调用真实的 `runAgent` 或 `runEvaluation`，并可通过 `capture=true` 隐藏导航，方便作品集截图。
 
 ## 下一层
 

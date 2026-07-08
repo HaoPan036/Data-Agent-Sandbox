@@ -11,6 +11,7 @@ The React shell includes:
 - Overview page with hero area, platform cards, and topic cards.
 - Topic detail page with information, summary, data sources, glossary, sample questions, right contents panel, and bottom composer.
 - Evaluation page with versioned testset selector, summary cards, failure mode distribution, case table, trace details, and local bad-case review queue.
+- Showcase route with capture-ready agent, guardrail, and evaluation frames generated from real deterministic outputs.
 
 The composer executes supported Retail Growth Demo and Experiment Metrics Demo questions through the deterministic agent runner. Knowledge Base Demo remains metadata-only in this stage.
 
@@ -65,6 +66,10 @@ The UI displays final answer, intent, selected metrics, selected tables, SQL, va
 `src/evaluation/testset.ts` defines versioned public regression testsets for core agent behavior and governance behavior. `src/evaluation/evaluator.ts` runs every case through the real deterministic `runAgent` path. `src/evaluation/scoringRules.ts` scores each AgentRun with deterministic criteria for intent, metrics, tables, SQL validation, execution, guardrails, warnings, grounded answers, trace completeness, and blocked-request safety.
 
 The dashboard does not call an LLM judge or external API. Bad Case Review Queue state is local UI state only.
+
+## Showcase Layer
+
+`/showcase` supports `view=agent`, `view=guardrail`, and `view=evaluation`. The views call real `runAgent` or `runEvaluation` and can hide navigation with `capture=true` for portfolio screenshots.
 
 ## Next Layer
 

@@ -12,12 +12,14 @@
 - 增加 SQL、validation checks、结果行、chart preview、trace timeline、warnings、guardrail decision 和 suggested follow-ups 的 UI 面板。
 - 实现 demo 优先的 Overview，支持一键运行确定性 quick run。
 - 实现 Evaluation Dashboard，包含版本化测试集、真实 AgentRun 执行、确定性评分、Trace review、failure mode 汇总和本地 Bad Case Review Queue。
+- 实现 Screenshot Showcase UI，用于 agent run、guardrail 和 evaluation 的作品集截图。
 - 增加数据、语义元数据、Topic、页面、SQL 生成、SQL 校验、SQL 执行、agent run 和文档覆盖测试。
 
 ## 当前边界
 
 - 当前应用会在本地执行已支持的 Retail Growth Demo 和 Experiment Metrics Demo 问题。
 - Evaluation Dashboard 会通过真实确定性 agent 执行测试集，不伪造评测结果。
+- Screenshot Showcase 使用真实确定性执行，并通过 `capture=true` 隐藏非必要 UI。
 - Knowledge Base Demo 在接入检索执行前仍是 metadata-only。
 - UI 不伪造 SQL、Trace、图表、回答或评测结果。
 

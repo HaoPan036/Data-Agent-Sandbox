@@ -2,12 +2,14 @@ import { useMemo, useState } from "react";
 import { AppShell } from "./components/layout/AppShell";
 import { EvaluationPage } from "./pages/EvaluationPage";
 import { OverviewPage } from "./pages/OverviewPage";
+import { ShowcasePage } from "./pages/ShowcasePage";
 import { TopicDetailPage } from "./pages/TopicDetailPage";
 import { getTopicById, topicCatalog } from "./topics/topicCatalog";
 
 type ActivePage = "overview" | "evaluation" | "topic";
 
 export default function App() {
+  const isShowcaseRoute = window.location.pathname === "/showcase";
   const [activePage, setActivePage] = useState<ActivePage>("overview");
   const [activeTopicId, setActiveTopicId] = useState<string | undefined>();
   const [initialTopicQuestion, setInitialTopicQuestion] = useState<string | undefined>();
@@ -15,6 +17,10 @@ export default function App() {
     () => (activeTopicId ? getTopicById(activeTopicId) : undefined),
     [activeTopicId]
   );
+
+  if (isShowcaseRoute) {
+    return <ShowcasePage />;
+  }
 
   function handleOpenOverview() {
     setActivePage("overview");

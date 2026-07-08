@@ -12,12 +12,14 @@
 - Added UI panels for generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
 - Implemented the demo first Overview with one click deterministic quick runs.
 - Implemented the Evaluation Dashboard with versioned testsets, real AgentRun execution, deterministic scoring, trace review, failure mode summaries, and local Bad Case Review Queue.
+- Implemented Screenshot Showcase UI for agent run, guardrail, and evaluation portfolio captures.
 - Added tests for data, semantic metadata, topics, pages, SQL generation, SQL validation, SQL execution, agent runs, and documentation coverage.
 
 ## Current Boundary
 
 - The app executes supported Retail Growth Demo and Experiment Metrics Demo questions locally.
 - The Evaluation Dashboard executes test cases through the real deterministic agent and does not fake results.
+- The Screenshot Showcase uses real deterministic execution and hides nonessential UI with `capture=true`.
 - Knowledge Base Demo remains metadata-only until retrieval execution is added.
 - The UI does not fake SQL, traces, charts, answers, or evaluation results.
 

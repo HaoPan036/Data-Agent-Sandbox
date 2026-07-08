@@ -9,6 +9,28 @@ function statusLabel(status: EvaluationCaseResult["status"]) {
   return status.replaceAll("_", " ");
 }
 
+function statusTone(status: EvaluationCaseResult["status"]) {
+  if (status === "passed" || status === "blocked_expected") {
+    return "green";
+  }
+
+  if (status === "needs_review") {
+    return "amber";
+  }
+
+  return "red";
+}
+
+function compactReasons(reasons: string[]) {
+  if (reasons.length === 0) {
+    return "None";
+  }
+
+  const text = reasons.join(" ");
+
+  return text.length > 120 ? `${text.slice(0, 117)}...` : text;
+}
+
 export function EvaluationCaseTable({ caseResults, onSelectCase }: EvaluationCaseTableProps) {
   return (
     <section className="evaluation-panel">
@@ -34,9 +56,13 @@ export function EvaluationCaseTable({ caseResults, onSelectCase }: EvaluationCas
                 <td>{caseResult.userQuestion}</td>
                 <td>{caseResult.expected.intent}</td>
                 <td>{caseResult.actual.intent}</td>
-                <td>{statusLabel(caseResult.status)}</td>
+                <td>
+                  <span className={`case-status-chip case-status-chip--${statusTone(caseResult.status)}`}>
+                    {statusLabel(caseResult.status)}
+                  </span>
+                </td>
                 <td>{caseResult.failureMode}</td>
-                <td>{caseResult.failureReasons.join(" ") || "None"}</td>
+                <td className="case-reason-cell">{compactReasons(caseResult.failureReasons)}</td>
                 <td>
                   <button className="button button--secondary" onClick={() => onSelectCase(caseResult)} type="button">
                     View trace

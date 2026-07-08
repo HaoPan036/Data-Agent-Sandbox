@@ -23,6 +23,14 @@ interface TopicDetailPageProps {
 }
 
 const contents = ["Information", "Summary", "Data Sources", "Glossary", "Sample Questions", "Execution"];
+type TopicTab = "run" | "data" | "glossary" | "trace";
+
+const tabs: Array<[TopicTab, string]> = [
+  ["run", "Run"],
+  ["data", "Data"],
+  ["glossary", "Glossary"],
+  ["trace", "Trace Notes"]
+];
 
 function supportedLabel(topicId: string) {
   if (topicId === "retail-growth-demo") {
@@ -45,6 +53,7 @@ function executionCallout(topicId: string) {
 }
 
 export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: TopicDetailPageProps) {
+  const [activeTab, setActiveTab] = useState<TopicTab>("run");
   const [selectedQuestion, setSelectedQuestion] = useState(
     initialQuestion ?? topic.sampleQuestions[0] ?? ""
   );
@@ -73,43 +82,86 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
     <div className="topic-detail-layout">
       <div className="page-stack">
         <TopicHeader topic={topic} />
-        <TopicInfoCard topic={topic} />
-        <TopicSummary topic={topic} />
-        <DataSourceOverview topic={topic} />
-        <GlossaryPreview topic={topic} />
+        <div className="topic-tab-bar" role="tablist" aria-label="Topic detail sections">
+          {tabs.map(([tab, label]) => (
+            <button
+              aria-selected={activeTab === tab}
+              className={activeTab === tab ? "topic-tab topic-tab--active" : "topic-tab"}
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              role="tab"
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-        <Card>
-          <h2>What This Topic Can Answer</h2>
-          <ul className="answer-list">
-            {topic.sampleQuestions.map((question) => (
-              <li key={question}>{question}</li>
-            ))}
-          </ul>
-        </Card>
+        {activeTab === "run" ? (
+          <>
+            <SampleQuestionList
+              onSelectQuestion={(question) => {
+                setSelectedQuestion(question);
+                setMessage("Selected question is ready to run.");
+              }}
+              questions={topic.sampleQuestions}
+              selectedQuestion={selectedQuestion}
+              supportedLabel={supportedLabel(topic.id)}
+            />
 
-        <SampleQuestionList
-          onSelectQuestion={(question) => {
-            setSelectedQuestion(question);
-            setMessage("Selected question is ready to run.");
-          }}
-          questions={topic.sampleQuestions}
-          selectedQuestion={selectedQuestion}
-          supportedLabel={supportedLabel(topic.id)}
-        />
+            <ChatComposer
+              message={message}
+              onChange={(value) => {
+                setSelectedQuestion(value);
+                setMessage("");
+              }}
+              onSkills={handleSkills}
+              onRun={handleRun}
+              value={selectedQuestion}
+            />
+            <div className="topic-execution-callout">{executionCallout(topic.id)}</div>
+            <div className="topic-showcase-callout">
+              <span>Screenshot path</span>
+              <a className="button button--secondary" href="/showcase?view=agent">
+                Open Agent Showcase
+              </a>
+            </div>
 
-        <ChatComposer
-          message={message}
-          onChange={(value) => {
-            setSelectedQuestion(value);
-            setMessage("");
-          }}
-          onSkills={handleSkills}
-          onRun={handleRun}
-          value={selectedQuestion}
-        />
-        <div className="topic-execution-callout">{executionCallout(topic.id)}</div>
+            {agentRun ? <ExecutionResultPanel run={agentRun} /> : null}
+          </>
+        ) : null}
 
-        {agentRun ? <ExecutionResultPanel run={agentRun} /> : null}
+        {activeTab === "data" ? (
+          <>
+            <TopicInfoCard topic={topic} />
+            <TopicSummary topic={topic} />
+            <DataSourceOverview topic={topic} />
+          </>
+        ) : null}
+
+        {activeTab === "glossary" ? (
+          <>
+            <GlossaryPreview topic={topic} />
+            <Card>
+              <h2>What This Topic Can Answer</h2>
+              <ul className="answer-list">
+                {topic.sampleQuestions.map((question) => (
+                  <li key={question}>{question}</li>
+                ))}
+              </ul>
+            </Card>
+          </>
+        ) : null}
+
+        {activeTab === "trace" ? (
+          <>
+            <TopicHealthCard topic={topic} />
+            <EmptyState title="Execution Coverage">
+              Retail Growth Demo and Experiment Metrics Demo execute deterministic SQL locally.
+              Knowledge Base Demo remains metadata-only in this stage.
+            </EmptyState>
+          </>
+        ) : null}
       </div>
 
       <aside className="topic-right-rail">

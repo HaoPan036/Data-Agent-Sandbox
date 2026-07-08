@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { runAgent } from "./agent/runAgent";
 import App from "./App";
 import { AgentLifecyclePreview } from "./components/overview/AgentLifecyclePreview";
 import { QuickDemoRunner } from "./components/overview/QuickDemoRunner";
@@ -8,17 +9,21 @@ import { agentLifecycleStepLabels } from "./components/overview/lifecycleSteps";
 import { TopicDetailPage } from "./pages/TopicDetailPage";
 import { topicCatalog } from "./topics/topicCatalog";
 
+beforeEach(() => {
+  window.history.pushState({}, "", "/");
+});
+
 describe("App", () => {
   it("renders the public platform overview", () => {
     render(<App />);
 
-    expect(
-      screen.getByRole("heading", {
-        name: "Run a Governed Data Agent"
-      })
-    ).toBeInTheDocument();
-    expect(screen.getByText("LIVE DETERMINISTIC DEMO")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Run the Agent" })).toBeInTheDocument();
+    expect(screen.getByText("DATA AGENT SANDBOX")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Run a supported question" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open Agent Showcase" })).toHaveAttribute(
+      "href",
+      "/showcase?view=agent"
+    );
     expect(screen.getAllByText("Data Agent Sandbox").length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: /New Topic/i })).toBeDisabled();
   });
@@ -62,6 +67,64 @@ describe("App", () => {
         name: "Build observable and testable data agents"
       })
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Ask a business question, generate validated SQL, execute it on synthetic data/i)
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("ShowcasePage", () => {
+  it("renders the default agent showcase at /showcase", () => {
+    window.history.pushState({}, "", "/showcase");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Agent Run" })).toBeInTheDocument();
+    expect(screen.getByText("LIVE DETERMINISTIC RUN")).toBeInTheDocument();
+  });
+
+  it("renders the agent run showcase with real runAgent output", () => {
+    const run = runAgent(
+      "Which product category had the highest refund rate last month?",
+      "retail-growth-demo",
+      { runId: "test-showcase-agent" }
+    );
+    window.history.pushState({}, "", "/showcase?view=agent");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Agent Run" })).toBeInTheDocument();
+    expect(screen.getByText(run.finalAnswer)).toBeInTheDocument();
+    expect(screen.getByText(/SELECT o\.category AS category/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Result Preview" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Trace Rail" })).toBeInTheDocument();
+  });
+
+  it("renders the guardrail showcase with blocked real runAgent output", () => {
+    window.history.pushState({}, "", "/showcase?view=guardrail");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Sensitive Request Blocked" })).toBeInTheDocument();
+    expect(screen.getByText("Blocked by Query Guard")).toBeInTheDocument();
+    expect(screen.getAllByText("No SQL executed").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/SELECT\s+/i)).not.toBeInTheDocument();
+  });
+
+  it("renders the evaluation showcase with real runEvaluation summary", () => {
+    window.history.pushState({}, "", "/showcase?view=evaluation");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Evaluation Dashboard" })).toBeInTheDocument();
+    expect(screen.getByText("Core Regression Testset v1")).toBeInTheDocument();
+    expect(screen.getByText("20")).toBeInTheDocument();
+    expect(screen.getByText("Pass rate")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Failure Mode Distribution" })).toBeInTheDocument();
+  });
+
+  it("hides nonessential showcase navigation when capture is true", () => {
+    window.history.pushState({}, "", "/showcase?view=agent&capture=true");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Agent Run" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Showcase views" })).not.toBeInTheDocument();
   });
 });
 
@@ -107,11 +170,30 @@ describe("TopicDetailPage", () => {
     render(<TopicDetailPage topic={topic} />);
 
     expect(screen.getByRole("heading", { name: topic.name })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Information" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Data Source Overview" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Run" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Data" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Data Source Overview" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Glossary Preview" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sample Questions" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Topic Health" })).toBeInTheDocument();
-    expect(screen.getByText("Supported now")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open Agent Showcase" })).toHaveAttribute(
+      "href",
+      "/showcase?view=agent"
+    );
+  });
+
+  it("shows data and glossary sections only after their tabs are selected", () => {
+    render(<TopicDetailPage topic={topicCatalog[0]} />);
+
+    expect(screen.queryByRole("heading", { name: "Data Source Overview" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Glossary" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Data" }));
+    expect(screen.getByRole("heading", { name: "Data Source Overview" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Glossary Preview" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Glossary" }));
+    expect(screen.getByRole("heading", { name: "Glossary Preview" })).toBeInTheDocument();
   });
 
   it("updates selected question when a sample question is clicked", () => {
@@ -225,5 +307,7 @@ describe("README", () => {
     expect(readme).toContain("视觉产品外壳状态");
     expect(readme).toContain("Evaluation Dashboard");
     expect(readme).toContain("评估面板");
+    expect(readme).toContain("Screenshot Showcase");
+    expect(readme).toContain("作品集截图页面");
   });
 });

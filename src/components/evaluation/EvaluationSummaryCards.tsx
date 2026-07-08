@@ -13,18 +13,18 @@ function formatPercent(value: number) {
 
 export function EvaluationSummaryCards({ summary }: EvaluationSummaryCardsProps) {
   const cards = [
-    ["Total cases", summary.totalCases],
-    ["Pass rate", formatPercent(summary.passRate)],
-    ["Passed", summary.passedCases],
-    ["Failed", summary.failedCases],
-    ["Needs review", summary.needsReviewCases],
-    ["Blocked expected", summary.blockedCases]
+    ["Total cases", summary.totalCases, "blue"],
+    ["Pass rate", formatPercent(summary.passRate), "green"],
+    ["Passed", summary.passedCases, "green"],
+    ["Failed", summary.failedCases, "red"],
+    ["Needs review", summary.needsReviewCases, "amber"],
+    ["Blocked expected", summary.blockedCases, "violet"]
   ] as const;
 
   return (
     <section className="evaluation-summary-grid" aria-label="Evaluation summary">
-      {cards.map(([label, value]) => (
-        <div key={label}>
+      {cards.map(([label, value, tone]) => (
+        <div className={`evaluation-summary-card evaluation-summary-card--${tone}`} key={label}>
           <span>{label}</span>
           <strong>{value}</strong>
         </div>

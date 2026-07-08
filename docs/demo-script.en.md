@@ -16,3 +16,13 @@
 14. Open the full Retail Growth Demo page for detailed trace.
 15. Explain the confidentiality boundary: synthetic data only, no internal data, code, prompts, schemas, screenshots, metrics, roadmap details, or proprietary workflows.
 16. Explain the next stage: deterministic Skill Runner, HTML Reports, and optional LLM integration only behind explicit API-key configuration.
+
+## Screenshot Flow
+
+1. Open `/showcase?view=agent&capture=true`.
+2. Capture successful agent run.
+3. Open `/showcase?view=guardrail&capture=true`.
+4. Capture blocked sensitive request.
+5. Open `/showcase?view=evaluation&capture=true`.
+6. Capture regression evaluation dashboard.
+7. Use these screenshots on the personal portfolio.
