@@ -6,11 +6,12 @@ import { Button } from "../components/ui/Button";
 import type { Topic } from "../topics/topicTypes";
 
 interface OverviewPageProps {
+  onOpenEvaluation: () => void;
   onOpenTopic: (topicId: string, initialQuestion?: string) => void;
   topics: Topic[];
 }
 
-export function OverviewPage({ onOpenTopic, topics }: OverviewPageProps) {
+export function OverviewPage({ onOpenEvaluation, onOpenTopic, topics }: OverviewPageProps) {
   const retailTopicId = topics.find((topic) => topic.id === "retail-growth-demo")?.id ?? topics[0]?.id ?? "";
 
   function runQuickDemo() {
@@ -52,6 +53,9 @@ export function OverviewPage({ onOpenTopic, topics }: OverviewPageProps) {
         <div className="compact-section-heading">
           <span className="section-header__eyebrow">What works now</span>
           <h2>Live pieces</h2>
+          <Button onClick={onOpenEvaluation} variant="secondary">
+            Open Evaluation
+          </Button>
         </div>
         <StatusChipGrid />
       </section>

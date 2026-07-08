@@ -3,14 +3,18 @@ import { RecentSessionTree } from "../topic/RecentSessionTree";
 import { Badge } from "../ui/Badge";
 
 interface SidebarProps {
+  activePage: "overview" | "evaluation" | "topic";
   activeTopicId?: string;
+  onOpenEvaluation: () => void;
   onOpenOverview: () => void;
   onOpenTopic: (topicId: string, initialQuestion?: string) => void;
   topics: Topic[];
 }
 
 export function Sidebar({
+  activePage,
   activeTopicId,
+  onOpenEvaluation,
   onOpenOverview,
   onOpenTopic,
   topics
@@ -27,6 +31,15 @@ export function Sidebar({
       <button className="new-topic-button" disabled type="button">
         New Topic
         <span>Coming soon</span>
+      </button>
+
+      <button
+        className={activePage === "evaluation" ? "evaluation-nav evaluation-nav--active" : "evaluation-nav"}
+        onClick={onOpenEvaluation}
+        type="button"
+      >
+        Evaluation Dashboard
+        <span>Versioned testsets</span>
       </button>
 
       <nav aria-label="Recent sessions" className="sidebar__section">

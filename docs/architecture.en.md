@@ -10,6 +10,7 @@ The React shell includes:
 - Top bar with page title and placeholder actions.
 - Overview page with hero area, platform cards, and topic cards.
 - Topic detail page with information, summary, data sources, glossary, sample questions, right contents panel, and bottom composer.
+- Evaluation page with versioned testset selector, summary cards, failure mode distribution, case table, trace details, and local bad-case review queue.
 
 The composer executes supported Retail Growth Demo and Experiment Metrics Demo questions through the deterministic agent runner. Knowledge Base Demo remains metadata-only in this stage.
 
@@ -59,6 +60,12 @@ The data includes at least 180 days, four public regions, four public channels, 
 
 The UI displays final answer, intent, selected metrics, selected tables, SQL, validation results, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
 
+## Evaluation Layer
+
+`src/evaluation/testset.ts` defines versioned public regression testsets for core agent behavior and governance behavior. `src/evaluation/evaluator.ts` runs every case through the real deterministic `runAgent` path. `src/evaluation/scoringRules.ts` scores each AgentRun with deterministic criteria for intent, metrics, tables, SQL validation, execution, guardrails, warnings, grounded answers, trace completeness, and blocked-request safety.
+
+The dashboard does not call an LLM judge or external API. Bad Case Review Queue state is local UI state only.
+
 ## Next Layer
 
-The next layer is an evaluation dashboard and bad-case review workflow, followed by richer editable reports and optional LLM integration behind explicit API-key configuration.
+The next layer is deterministic Skill Runner coverage and HTML report generation, followed by richer editable reports and optional LLM integration behind explicit API-key configuration.

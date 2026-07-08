@@ -33,6 +33,15 @@ describe("App", () => {
     expect(screen.getAllByText("Run sample").length).toBeGreaterThanOrEqual(3);
   });
 
+  it("opens the evaluation page from top-level navigation", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Evaluation Dashboard/i }));
+
+    expect(screen.getByRole("heading", { name: "Evaluation Dashboard" })).toBeInTheDocument();
+    expect(screen.getByText(/Run versioned testsets against the deterministic agent/i)).toBeInTheDocument();
+  });
+
   it("does not show SQL before a real quick demo run", () => {
     render(<App />);
 
@@ -148,11 +157,73 @@ describe("TopicDetailPage", () => {
   });
 });
 
+describe("EvaluationPage", () => {
+  it("renders the selector, no-run state, and LLM judge placeholder without fake summary output", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Evaluation Dashboard/i }));
+
+    expect(screen.getByRole("combobox", { name: /Testset version/i })).toHaveTextContent(
+      "Core Regression Testset v1"
+    );
+    expect(screen.getByRole("combobox", { name: /Testset version/i })).toHaveTextContent(
+      "Governance Regression Testset v1"
+    );
+    expect(screen.getByRole("heading", { name: "Not run yet" })).toBeInTheDocument();
+    expect(screen.getByText(/LLM judge is not enabled in this version/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText("Evaluation summary")).not.toBeInTheDocument();
+  });
+
+  it("runs evaluation and renders summary cards and case results", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Evaluation Dashboard/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Run Evaluation" }));
+
+    expect(screen.getByLabelText("Evaluation summary")).toBeInTheDocument();
+    expect(screen.getByText("Total cases")).toBeInTheDocument();
+    expect(screen.getByText("Pass rate")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Failure Mode Distribution" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Case Results" })).toBeInTheDocument();
+    expect(screen.getAllByText("core-014-ambiguity").length).toBeGreaterThan(0);
+  });
+
+  it("opens case details and shows trace output", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Evaluation Dashboard/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Run Evaluation" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "View trace" })[0]);
+
+    expect(screen.getByRole("heading", { name: "Trace" })).toBeInTheDocument();
+    expect(screen.getByText("Received question")).toBeInTheDocument();
+    expect(screen.getAllByText("Generated SQL").length).toBeGreaterThan(0);
+  });
+
+  it("adds a failed case to the bad case queue and marks it reviewed", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Evaluation Dashboard/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Run Evaluation" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add to review queue" }));
+
+    expect(screen.getByRole("heading", { name: "Bad Case Review Queue" })).toBeInTheDocument();
+    expect(screen.getAllByText("core-014-ambiguity").length).toBeGreaterThan(1);
+    expect(screen.getByText("unreviewed")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mark reviewed" }));
+
+    expect(screen.getByText("reviewed")).toBeInTheDocument();
+  });
+});
+
 describe("README", () => {
   it("contains English and Chinese stage sections", () => {
     const readme = readFileSync(`${process.cwd()}/README.md`, "utf8");
 
     expect(readme).toContain("Visual Product Shell Status");
     expect(readme).toContain("视觉产品外壳状态");
+    expect(readme).toContain("Evaluation Dashboard");
+    expect(readme).toContain("评估面板");
   });
 });

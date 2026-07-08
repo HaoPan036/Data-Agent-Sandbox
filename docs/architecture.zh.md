@@ -10,6 +10,7 @@ React 外壳包含：
 - 顶部栏：当前页面标题和占位操作。
 - Overview 页面：hero 区域、平台能力卡片和 Topic 卡片。
 - Topic 详情页：信息、摘要、数据源、术语表、示例问题、右侧目录和底部输入框。
+- Evaluation 页面：版本化测试集选择、summary cards、failure mode distribution、case table、trace details 和本地 bad-case review queue。
 
 输入框会把已支持的 Retail Growth Demo 和 Experiment Metrics Demo 问题交给确定性 agent runner 执行。Knowledge Base Demo 当前仍是 metadata-only。
 
@@ -59,6 +60,12 @@ React 外壳包含：
 
 UI 会展示 final answer、intent、selected metrics、selected tables、SQL、validation results、result rows、chart preview、trace timeline、warnings、guardrail decision 和 suggested follow-ups。
 
+## 评估层
+
+`src/evaluation/testset.ts` 定义公开的版本化回归测试集，覆盖核心 agent 行为和 governance 行为。`src/evaluation/evaluator.ts` 会把每个 case 跑过真实的确定性 `runAgent` 链路。`src/evaluation/scoringRules.ts` 用确定性规则评分，覆盖 intent、metrics、tables、SQL validation、execution、guardrails、warnings、grounded answers、trace completeness 和 blocked-request safety。
+
+评估面板不会调用 LLM judge 或外部 API。Bad Case Review Queue 只保存在本地 UI state 中。
+
 ## 下一层
 
-下一层是 evaluation dashboard 和 bad-case review，之后继续扩展可编辑报告，并仅在用户显式配置 API key 后增加可选 LLM 集成。
+下一层是确定性 Skill Runner 覆盖和 HTML report 生成，之后继续扩展可编辑报告，并仅在用户显式配置 API key 后增加可选 LLM 集成。

@@ -6,7 +6,7 @@ const statusChips = [
   ["SQL validation", "Implemented"],
   ["Local execution", "Implemented"],
   ["Trace timeline", "Implemented"],
-  ["Evaluation dashboard", "Next"],
+  ["Evaluation dashboard", "Implemented"],
   ["Skill reports", "Next"]
 ] as const;
 

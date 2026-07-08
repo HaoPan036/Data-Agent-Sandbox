@@ -11,12 +11,14 @@ import { TopicHeader } from "../components/topic/TopicHeader";
 import { TopicHealthCard } from "../components/topic/TopicHealthCard";
 import { TopicInfoCard } from "../components/topic/TopicInfoCard";
 import { TopicSummary } from "../components/topic/TopicSummary";
+import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import type { Topic } from "../topics/topicTypes";
 
 interface TopicDetailPageProps {
   initialQuestion?: string;
+  onOpenEvaluation?: () => void;
   topic: Topic;
 }
 
@@ -42,7 +44,7 @@ function executionCallout(topicId: string) {
   return "Supported now: This topic can execute selected deterministic questions end to end.";
 }
 
-export function TopicDetailPage({ initialQuestion, topic }: TopicDetailPageProps) {
+export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: TopicDetailPageProps) {
   const [selectedQuestion, setSelectedQuestion] = useState(
     initialQuestion ?? topic.sampleQuestions[0] ?? ""
   );
@@ -117,6 +119,11 @@ export function TopicDetailPage({ initialQuestion, topic }: TopicDetailPageProps
           Retail Growth Demo and Experiment Metrics Demo execute deterministic SQL locally.
           Knowledge Base Demo remains metadata-only in this stage.
         </EmptyState>
+        {onOpenEvaluation ? (
+          <Button onClick={onOpenEvaluation} variant="secondary">
+            Open Evaluation
+          </Button>
+        ) : null}
       </aside>
     </div>
   );

@@ -19,6 +19,7 @@ The project answers a simple question: can a small BI data-agent workflow be mad
 - Local SQL validation and AlaSQL execution against synthetic browser tables.
 - Result panels with grounded answer, selected intent, selected metrics, selected tables, generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
 - Guardrails that block sensitive customer export or user-level record requests before SQL generation.
+- Evaluation Dashboard with versioned deterministic testsets, real AgentRun execution, pass or fail scoring, failure reasons, trace inspection, failure mode summaries, and local Bad Case Review Queue.
 - Synthetic ecommerce, traffic, campaign, product, masked customer, refund, and experiment event tables.
 - Semantic schema metadata, metric catalog, topic catalog, and lightweight knowledge base.
 - Deterministic local test coverage for data, topics, schema, metrics, knowledge entries, SQL generation, SQL validation, SQL execution, agent runs, and pages.
@@ -36,6 +37,10 @@ This stage adds the deterministic execution chain:
 ## Demo first Overview
 
 The Overview page now exposes a one click deterministic demo. Supported questions run through the real agent path, including intent routing, SQL generation, validation, local execution, trace logging, warnings, and grounded answers.
+
+## Evaluation Dashboard
+
+The Evaluation Dashboard runs versioned testsets through the real deterministic agent. Each case produces an AgentRun, deterministic pass or fail scoring, failure reasons, trace inspection, and optional local bad case review. No LLM judge is called in this version.
 
 ## Public Platform Layout
 
@@ -77,9 +82,9 @@ The knowledge layer stores public, generic entries for metric definitions, exper
 
 Clicking a supported Retail Growth Demo or Experiment Metrics Demo sample question and then Run executes the deterministic workflow locally. Unsupported questions return suggestions. Sensitive customer export prompts are blocked before SQL generation.
 
-## Next Stage: Evaluation Dashboard And Bad Case Review
+## Next Stage: Skill Runner And HTML Reports
 
-The next stage can add an evaluation dashboard, bad-case review, richer editable report workflows, and public report export. Optional LLM integration should remain behind explicit API-key configuration.
+The next stage can expand the deterministic skill runner and HTML report generation flow. Optional LLM integration should remain behind explicit API-key configuration.
 
 ## Architecture
 
@@ -106,8 +111,8 @@ This project uses synthetic or public data only. It does not contain internal co
 
 ## Roadmap
 
-- Add evaluation dashboard and bad-case review.
-- Expand report editing and export.
+- Expand deterministic Skill Runner coverage.
+- Add HTML report generation and editable report workflows.
 - Strengthen SQL parsing and validation edge cases.
 - Add optional LLM integration only behind explicit API-key configuration.
 
@@ -131,6 +136,7 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 - 在浏览器内使用 AlaSQL 对合成表进行本地 SQL 校验和执行。
 - 结果面板展示 final answer、intent、指标、数据表、SQL、validation、结果行、chart、trace、warning、guardrail decision 和 follow-up。
 - 对导出客户邮箱、选择所有客户记录等敏感请求，会在 SQL 生成前阻断。
+- 评估面板支持版本化确定性测试集、真实 AgentRun 执行、pass 或 fail 评分、失败原因、Trace 检查、failure mode 汇总和本地 Bad Case Review Queue。
 - 合成订单、流量、活动、商品、脱敏客户、退款、实验事件数据表。
 - 语义 schema、指标目录、Topic 目录和轻量知识库。
 - 针对数据、Topic、schema、指标、知识库、SQL 生成、SQL 校验、SQL 执行、agent run 和页面的本地测试。
@@ -148,6 +154,10 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 ## Demo 优先的首页
 
 首页现在提供一键运行的确定性 demo。支持的问题会走真实 agent 链路，包括意图识别、SQL 生成、SQL 校验、本地执行、Trace、warnings 和基于结果的回答。
+
+## 评估面板
+
+评估面板会把版本化测试集跑过真实的确定性 agent。每个 case 都会生成 AgentRun、确定性 pass 或 fail、失败原因、Trace 检查和本地 Bad Case Review。本版本不调用 LLM judge。
 
 ## 公共版平台布局
 
@@ -185,9 +195,9 @@ schema 层定义了所有公开合成数据表：
 
 点击 Retail Growth Demo 或 Experiment Metrics Demo 的已支持示例问题，再点击 Run，会在本地执行确定性工作流。暂不支持的问题会返回建议问题。敏感客户导出请求会在 SQL 生成前被阻断。
 
-## 下一阶段：评测看板和 bad case review
+## 下一阶段：Skill Runner 和 HTML Reports
 
-下一阶段可以增加 evaluation dashboard、bad-case review、更完整的可编辑报告流程和公开报告导出。可选 LLM 集成仍应放在用户显式配置 API key 之后。
+下一阶段可以扩展确定性的 Skill Runner 和 HTML Report 生成流程。可选 LLM 集成仍应放在用户显式配置 API key 之后。
 
 ## 视觉产品外壳状态
 
@@ -220,7 +230,7 @@ English boundary statement: This project uses synthetic or public data only. It 
 
 ## 路线图
 
-- 增加 evaluation dashboard 和 bad-case review。
-- 扩展报告编辑和导出。
+- 扩展确定性 Skill Runner 覆盖范围。
+- 增加 HTML report 生成和可编辑报告流程。
 - 强化 SQL 解析与校验边界场景。
 - 仅在用户显式配置 API key 后增加可选 LLM 集成。
