@@ -17,9 +17,11 @@ describe("App", () => {
   it("renders the public platform overview", () => {
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "Run the Agent" })).toBeInTheDocument();
-    expect(screen.getByText("DATA AGENT SANDBOX")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Run a supported question" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Ask your data. Get answers you can trust." })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Agent run" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Topic Market" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open Agent Showcase" })).toHaveAttribute(
       "href",
       "/showcase?view=agent"
@@ -28,14 +30,21 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: /New Topic/i })).toBeDisabled();
   });
 
-  it("renders compact topic card metadata", () => {
+  it("renders the topic market cards", () => {
     render(<App />);
 
-    expect(screen.getAllByText("Tables").length).toBeGreaterThanOrEqual(3);
-    expect(screen.getAllByText("Metrics").length).toBeGreaterThanOrEqual(3);
-    expect(screen.getAllByText("Questions").length).toBeGreaterThanOrEqual(3);
-    expect(screen.getAllByText("Open").length).toBeGreaterThanOrEqual(3);
-    expect(screen.getAllByText("Run sample").length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByText(/Try it now/).length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByText("Demo").length).toBeGreaterThanOrEqual(3);
+    expect(screen.getByRole("heading", { name: "Retail Growth Demo" })).toBeInTheDocument();
+  });
+
+  it("filters topic market cards by source type", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Knowledge" }));
+
+    expect(screen.getByRole("heading", { name: "Knowledge Base Demo" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Retail Growth Demo" })).not.toBeInTheDocument();
   });
 
   it("opens the evaluation page from top-level navigation", () => {
