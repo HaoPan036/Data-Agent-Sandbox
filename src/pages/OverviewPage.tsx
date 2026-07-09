@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { ReadyTopicWalkthrough } from "../components/overview/ReadyTopicWalkthrough";
+import { SkillRunnerDemo } from "../components/skills/SkillRunnerDemo";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
-import { SkillRunnerDemo } from "../components/skills/SkillRunnerDemo";
 import { skillCatalog } from "../skills/skillCatalog";
 import type { Topic } from "../topics/topicTypes";
 
@@ -153,6 +154,7 @@ export function OverviewPage({ onOpenEvaluation, onOpenTopic, topics }: Overview
   const [filter, setFilter] = useState<TopicFilter>("all");
 
   const firstTopic = topics[0];
+  const readyTopic = topics.find((topic) => topic.id === "retail-growth-demo") ?? firstTopic;
   const filteredTopics = topics.filter((topic) => {
     if (filter === "all") {
       return true;
@@ -214,6 +216,10 @@ export function OverviewPage({ onOpenEvaluation, onOpenTopic, topics }: Overview
           )
         )}
       </section>
+
+      {readyTopic ? (
+        <ReadyTopicWalkthrough onOpenTopic={onOpenTopic} topic={readyTopic} />
+      ) : null}
 
       {firstTopic ? (
         <div className="landing-cta">

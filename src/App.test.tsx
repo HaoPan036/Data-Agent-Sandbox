@@ -38,6 +38,23 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Retail Growth Demo" })).toBeInTheDocument();
   });
 
+  it("opens the prepared topic walkthrough with a default executable question", () => {
+    render(<App />);
+
+    expect(
+      screen.getByRole("heading", { name: "Start with one prepared BI topic" })
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Execution process")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open Ready Topic" }));
+
+    expect(screen.getAllByRole("heading", { name: "Retail Growth Demo" }).length).toBeGreaterThan(0);
+    expect(screen.getByLabelText("Topic question")).toHaveValue(
+      "Which product category had the highest refund rate last month?"
+    );
+    expect(screen.getByText("Selected question is ready to run.")).toBeInTheDocument();
+  });
+
   it("filters topic market cards by source type", () => {
     render(<App />);
 
