@@ -20,6 +20,7 @@ The project answers a simple question: can a small BI data-agent workflow be mad
 - Result panels with grounded answer, selected intent, selected metrics, selected tables, generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
 - Guardrails that block sensitive customer export or user-level record requests before SQL generation.
 - Evaluation Dashboard with versioned deterministic testsets, real AgentRun execution, pass or fail scoring, failure reasons, trace inspection, failure mode summaries, and local Bad Case Review Queue.
+- Skill Hub demo pipeline that runs deterministic skills end to end and produces an editable downloadable HTML report.
 - Screenshot Showcase route for portfolio-ready agent, guardrail, and evaluation frames.
 - Synthetic ecommerce, traffic, campaign, product, masked customer, refund, and experiment event tables.
 - Semantic schema metadata, metric catalog, topic catalog, and lightweight knowledge base.
@@ -42,6 +43,10 @@ The Overview page now exposes a one click deterministic demo. Supported question
 ## Evaluation Dashboard
 
 The Evaluation Dashboard runs versioned testsets through the real deterministic agent. Each case produces an AgentRun, deterministic pass or fail scoring, failure reasons, trace inspection, and optional local bad case review. No LLM judge is called in this version.
+
+## Skill Runner And HTML Reports
+
+The Skill Hub now runs the public deterministic skills as a demo pipeline. It routes the default business question, generates and validates SQL, executes against synthetic tables, runs the regression evaluation summary, and creates an editable HTML report draft that can be previewed or downloaded in the browser.
 
 ## Screenshot Showcase
 
@@ -87,9 +92,9 @@ The knowledge layer stores public, generic entries for metric definitions, exper
 
 Clicking a supported Retail Growth Demo or Experiment Metrics Demo sample question and then Run executes the deterministic workflow locally. Unsupported questions return suggestions. Sensitive customer export prompts are blocked before SQL generation.
 
-## Next Stage: Skill Runner And HTML Reports
+## Next Stage: Report Templates And Public Data Expansion
 
-The next stage can expand the deterministic skill runner and HTML report generation flow. Optional LLM integration should remain behind explicit API-key configuration.
+The next stage can add richer report templates, more public or synthetic datasets, and stronger SQL validation edge cases. Optional LLM integration should remain behind explicit API-key configuration.
 
 ## Architecture
 
@@ -116,8 +121,8 @@ This project uses synthetic or public data only. It does not contain internal co
 
 ## Roadmap
 
-- Expand deterministic Skill Runner coverage.
-- Add HTML report generation and editable report workflows.
+- Add richer HTML report templates and report export polish.
+- Add more public or synthetic datasets.
 - Strengthen SQL parsing and validation edge cases.
 - Add optional LLM integration only behind explicit API-key configuration.
 
@@ -142,6 +147,7 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 - 结果面板展示 final answer、intent、指标、数据表、SQL、validation、结果行、chart、trace、warning、guardrail decision 和 follow-up。
 - 对导出客户邮箱、选择所有客户记录等敏感请求，会在 SQL 生成前阻断。
 - 评估面板支持版本化确定性测试集、真实 AgentRun 执行、pass 或 fail 评分、失败原因、Trace 检查、failure mode 汇总和本地 Bad Case Review Queue。
+- Skill Hub demo pipeline 可以端到端运行确定性 skills，并生成可编辑、可下载的 HTML 报告。
 - 新增作品集截图页面，提供 agent、guardrail 和 evaluation 三个截图视图。
 - 合成订单、流量、活动、商品、脱敏客户、退款、实验事件数据表。
 - 语义 schema、指标目录、Topic 目录和轻量知识库。
@@ -164,6 +170,10 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 ## 评估面板
 
 评估面板会把版本化测试集跑过真实的确定性 agent。每个 case 都会生成 AgentRun、确定性 pass 或 fail、失败原因、Trace 检查和本地 Bad Case Review。本版本不调用 LLM judge。
+
+## Skill Runner 和 HTML Reports
+
+Skill Hub 现在可以运行公开的确定性 skills demo pipeline。它会对默认业务问题做意图识别、SQL 生成与校验、本地合成表执行、回归评估摘要，并生成可在浏览器中预览或下载的可编辑 HTML 报告草稿。
 
 ## 作品集截图页面
 
@@ -205,9 +215,9 @@ schema 层定义了所有公开合成数据表：
 
 点击 Retail Growth Demo 或 Experiment Metrics Demo 的已支持示例问题，再点击 Run，会在本地执行确定性工作流。暂不支持的问题会返回建议问题。敏感客户导出请求会在 SQL 生成前被阻断。
 
-## 下一阶段：Skill Runner 和 HTML Reports
+## 下一阶段：报告模板和公开数据扩展
 
-下一阶段可以扩展确定性的 Skill Runner 和 HTML Report 生成流程。可选 LLM 集成仍应放在用户显式配置 API key 之后。
+下一阶段可以增加更丰富的报告模板、更多公开或合成数据集，并继续强化 SQL 校验边界。可选 LLM 集成仍应放在用户显式配置 API key 之后。
 
 ## 视觉产品外壳状态
 
@@ -240,7 +250,7 @@ English boundary statement: This project uses synthetic or public data only. It 
 
 ## 路线图
 
-- 扩展确定性 Skill Runner 覆盖范围。
-- 增加 HTML report 生成和可编辑报告流程。
+- 增加更丰富的 HTML 报告模板和报告导出 polish。
+- 增加更多公开或合成数据集。
 - 强化 SQL 解析与校验边界场景。
 - 仅在用户显式配置 API key 后增加可选 LLM 集成。

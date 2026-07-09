@@ -14,8 +14,11 @@
 12. Add a failed case to Bad Case Review Queue.
 13. Explain how bad cases become regression tests.
 14. Open the full Retail Growth Demo page for detailed trace.
-15. Explain the confidentiality boundary: synthetic data only, no internal data, code, prompts, schemas, screenshots, metrics, roadmap details, or proprietary workflows.
-16. Explain the next stage: deterministic Skill Runner, HTML Reports, and optional LLM integration only behind explicit API-key configuration.
+15. Return to Overview and open Skill Hub.
+16. Run Demo Skill Pipeline.
+17. Show completed skill timeline, evaluation summary, editable HTML report preview, and Download HTML.
+18. Explain the confidentiality boundary: synthetic data only, no internal data, code, prompts, schemas, screenshots, metrics, roadmap details, or proprietary workflows.
+19. Explain the next stage: richer report templates, more public or synthetic datasets, stronger SQL validation, and optional LLM integration only behind explicit API-key configuration.
 
 ## Screenshot Flow
 

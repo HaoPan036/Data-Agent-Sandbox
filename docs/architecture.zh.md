@@ -8,7 +8,7 @@ React 外壳包含：
 
 - 左侧边栏：应用名称、最近会话、可用 Topics、禁用的新建 Topic 按钮和演示用户区域。
 - 顶部栏：当前页面标题和占位操作。
-- Overview 页面：hero 区域、平台能力卡片和 Topic 卡片。
+- Overview 页面：hero 区域、平台能力卡片、Topic 卡片和 Skill Hub demo pipeline。
 - Topic 详情页：信息、摘要、数据源、术语表、示例问题、右侧目录和底部输入框。
 - Evaluation 页面：版本化测试集选择、summary cards、failure mode distribution、case table、trace details 和本地 bad-case review queue。
 - Showcase 路由：提供 agent、guardrail 和 evaluation 的截图视图，全部来自真实确定性输出。
@@ -67,10 +67,16 @@ UI 会展示 final answer、intent、selected metrics、selected tables、SQL、
 
 评估面板不会调用 LLM judge 或外部 API。Bad Case Review Queue 只保存在本地 UI state 中。
 
+## Skill Runner 和 Reporting 层
+
+`src/skills/skillRunner.ts` 会把公开确定性 skills 作为一个本地 demo pipeline 运行。它复用真实 `runAgent` 输出和真实 evaluation summary，不调用外部 API。
+
+`src/reporting/htmlReport.ts` 会从 AgentRun 生成独立的可编辑 HTML 报告。报告包含问题、grounded answer、guardrail decision、生成的 SQL、validation checks、执行结果样例和 trace steps。
+
 ## 截图层
 
 `/showcase` 支持 `view=agent`、`view=guardrail` 和 `view=evaluation`。这些视图会调用真实的 `runAgent` 或 `runEvaluation`，并可通过 `capture=true` 隐藏导航，方便作品集截图。
 
 ## 下一层
 
-下一层是确定性 Skill Runner 覆盖和 HTML report 生成，之后继续扩展可编辑报告，并仅在用户显式配置 API key 后增加可选 LLM 集成。
+下一层是更丰富的报告模板、更多公开或合成数据集、更强的 SQL 校验边界，以及仅在用户显式配置 API key 后增加可选 LLM 集成。

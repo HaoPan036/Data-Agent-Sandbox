@@ -12,6 +12,8 @@
 - Added UI panels for generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
 - Implemented the demo first Overview with one click deterministic quick runs.
 - Implemented the Evaluation Dashboard with versioned testsets, real AgentRun execution, deterministic scoring, trace review, failure mode summaries, and local Bad Case Review Queue.
+- Implemented the Skill Hub demo pipeline that runs deterministic public skills end to end.
+- Added AgentRun-based HTML report generation with editable browser preview and download.
 - Implemented Screenshot Showcase UI for agent run, guardrail, and evaluation portfolio captures.
 - Added tests for data, semantic metadata, topics, pages, SQL generation, SQL validation, SQL execution, agent runs, and documentation coverage.
 
@@ -19,14 +21,15 @@
 
 - The app executes supported Retail Growth Demo and Experiment Metrics Demo questions locally.
 - The Evaluation Dashboard executes test cases through the real deterministic agent and does not fake results.
+- The Skill Hub executes the demo skill pipeline, evaluation summary, and HTML report generation locally.
 - The Screenshot Showcase uses real deterministic execution and hides nonessential UI with `capture=true`.
 - Knowledge Base Demo remains metadata-only until retrieval execution is added.
 - The UI does not fake SQL, traces, charts, answers, or evaluation results.
 
-## Next Stage: Skill Runner And HTML Reports
+## Next Stage: Report Templates And Public Data Expansion
 
-- Expand deterministic Skill Runner coverage for public skills.
-- Add HTML report generation and editable report workflows.
+- Add richer report templates and export polish.
+- Add more public or synthetic datasets.
 - Strengthen SQL parsing and validation edge cases.
 
 ## Later Versions
@@ -34,5 +37,5 @@
 - Add more public or synthetic datasets.
 - Add more business-question templates.
 - Strengthen SQL parsing and validation.
-- Export reports.
+- Add richer report exports.
 - Add optional LLM support behind explicit user configuration.

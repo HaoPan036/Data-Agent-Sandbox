@@ -12,6 +12,8 @@
 - 增加 SQL、validation checks、结果行、chart preview、trace timeline、warnings、guardrail decision 和 suggested follow-ups 的 UI 面板。
 - 实现 demo 优先的 Overview，支持一键运行确定性 quick run。
 - 实现 Evaluation Dashboard，包含版本化测试集、真实 AgentRun 执行、确定性评分、Trace review、failure mode 汇总和本地 Bad Case Review Queue。
+- 实现 Skill Hub demo pipeline，可以端到端运行公开确定性 skills。
+- 增加基于 AgentRun 的 HTML 报告生成，支持浏览器内编辑预览和下载。
 - 实现 Screenshot Showcase UI，用于 agent run、guardrail 和 evaluation 的作品集截图。
 - 增加数据、语义元数据、Topic、页面、SQL 生成、SQL 校验、SQL 执行、agent run 和文档覆盖测试。
 
@@ -19,14 +21,15 @@
 
 - 当前应用会在本地执行已支持的 Retail Growth Demo 和 Experiment Metrics Demo 问题。
 - Evaluation Dashboard 会通过真实确定性 agent 执行测试集，不伪造评测结果。
+- Skill Hub 会在本地执行 demo skill pipeline、评估摘要和 HTML 报告生成。
 - Screenshot Showcase 使用真实确定性执行，并通过 `capture=true` 隐藏非必要 UI。
 - Knowledge Base Demo 在接入检索执行前仍是 metadata-only。
 - UI 不伪造 SQL、Trace、图表、回答或评测结果。
 
-## 下一阶段：Skill Runner 和 HTML Reports
+## 下一阶段：报告模板和公开数据扩展
 
-- 扩展公开技能的确定性 Skill Runner 覆盖范围。
-- 增加 HTML report 生成和可编辑报告流程。
+- 增加更丰富的报告模板和导出 polish。
+- 增加更多公开或合成数据集。
 - 强化 SQL 解析与校验边界场景。
 
 ## 后续版本
@@ -34,5 +37,5 @@
 - 增加更多公开或合成数据集。
 - 增加更多业务问题模板。
 - 强化 SQL 解析与校验。
-- 支持报告导出。
+- 增加更丰富的报告导出能力。
 - 在用户显式配置后增加可选 LLM 支持。

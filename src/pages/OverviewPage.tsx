@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
+import { SkillRunnerDemo } from "../components/skills/SkillRunnerDemo";
 import { skillCatalog } from "../skills/skillCatalog";
 import type { Topic } from "../topics/topicTypes";
 
@@ -285,17 +286,20 @@ export function OverviewPage({ onOpenEvaluation, onOpenTopic, topics }: Overview
             </div>
           </>
         ) : (
-          <div className="market-grid">
-            {skillCatalog.map((skill) => (
-              <article className="market-skill-card" key={skill.id}>
-                <div className="market-card__top">
-                  <h3>{skill.name}</h3>
-                  <Badge tone={skill.status === "ready" ? "green" : "neutral"}>{skill.status}</Badge>
-                </div>
-                <p>{skill.description}</p>
-              </article>
-            ))}
-          </div>
+          <>
+            <SkillRunnerDemo />
+            <div className="market-grid">
+              {skillCatalog.map((skill) => (
+                <article className="market-skill-card" key={skill.id}>
+                  <div className="market-card__top">
+                    <h3>{skill.name}</h3>
+                    <Badge tone={skill.status === "ready" ? "green" : "neutral"}>{skill.status}</Badge>
+                  </div>
+                  <p>{skill.description}</p>
+                </article>
+              ))}
+            </div>
+          </>
         )}
       </section>
 

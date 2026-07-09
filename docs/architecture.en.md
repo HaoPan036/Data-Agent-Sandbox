@@ -8,7 +8,7 @@ The React shell includes:
 
 - Left sidebar with app identity, recent sessions, available topics, disabled new topic action, and demo user area.
 - Top bar with page title and placeholder actions.
-- Overview page with hero area, platform cards, and topic cards.
+- Overview page with hero area, platform cards, topic cards, and Skill Hub demo pipeline.
 - Topic detail page with information, summary, data sources, glossary, sample questions, right contents panel, and bottom composer.
 - Evaluation page with versioned testset selector, summary cards, failure mode distribution, case table, trace details, and local bad-case review queue.
 - Showcase route with capture-ready agent, guardrail, and evaluation frames generated from real deterministic outputs.
@@ -67,10 +67,16 @@ The UI displays final answer, intent, selected metrics, selected tables, SQL, va
 
 The dashboard does not call an LLM judge or external API. Bad Case Review Queue state is local UI state only.
 
+## Skill Runner And Reporting Layer
+
+`src/skills/skillRunner.ts` runs the public deterministic skills as one local demo pipeline. It uses the real `runAgent` output, real evaluation summary, and no external APIs.
+
+`src/reporting/htmlReport.ts` creates a self-contained editable HTML report from an AgentRun. The report includes the question, grounded answer, guardrail decision, generated SQL, validation checks, executed result samples, and trace steps.
+
 ## Showcase Layer
 
 `/showcase` supports `view=agent`, `view=guardrail`, and `view=evaluation`. The views call real `runAgent` or `runEvaluation` and can hide navigation with `capture=true` for portfolio screenshots.
 
 ## Next Layer
 
-The next layer is deterministic Skill Runner coverage and HTML report generation, followed by richer editable reports and optional LLM integration behind explicit API-key configuration.
+The next layer is richer report templates, more public or synthetic datasets, stronger SQL validation edge cases, and optional LLM integration behind explicit API-key configuration.

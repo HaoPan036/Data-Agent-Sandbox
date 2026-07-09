@@ -47,6 +47,28 @@ describe("App", () => {
     expect(screen.queryByRole("heading", { name: "Retail Growth Demo" })).not.toBeInTheDocument();
   });
 
+  it("runs the Skill Hub demo pipeline and renders an editable HTML report", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Skill Hub" }));
+
+    expect(screen.getByRole("heading", { name: "Skill Runner Demo" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Generated HTML Report" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Run Demo Skill Pipeline" }));
+
+    expect(screen.getByLabelText("Skill runner summary")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Generated HTML Report" })).toBeInTheDocument();
+    expect((screen.getByLabelText("Editable HTML report draft") as HTMLTextAreaElement).value).toContain(
+      "BI Data Agent Report"
+    );
+    expect(screen.getByTitle("Generated HTML report preview")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Download HTML" })).toHaveAttribute(
+      "download",
+      "bi-data-agent-demo-report.html"
+    );
+  });
+
   it("opens the evaluation page from top-level navigation", () => {
     render(<App />);
 
