@@ -26,7 +26,7 @@
   color: #1d4ed8;
   padding: 7px 11px;
   font-size: 0.84rem;
-  font-weight: 850;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -59,7 +59,7 @@
 .showcase-muted {
   color: var(--color-text-secondary);
   font-size: var(--type-caption);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -111,7 +111,7 @@
 .showcase-card__heading span {
   color: var(--color-text-secondary);
   font-size: var(--type-caption);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -138,7 +138,7 @@
   margin-bottom: var(--space-lg);
   color: #172033;
   font-size: 1.08rem;
-  font-weight: 850;
+  font-weight: 600;
 }
 
 .showcase-chip-row,
@@ -154,7 +154,7 @@
   border-radius: 999px;
   padding: 6px 9px;
   font-size: var(--type-badge);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -208,7 +208,7 @@
 .showcase-metric-card span {
   color: #475569;
   font-size: var(--type-caption);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -247,7 +247,7 @@
   margin: var(--space-sm) 0 0;
   color: #17345f;
   font-size: 1.12rem;
-  font-weight: 780;
+  font-weight: 600;
 }
 
 .showcase-result-preview {
@@ -279,7 +279,7 @@
 .showcase-kpi-chart span {
   color: var(--color-text-secondary);
   font-size: var(--type-caption);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -341,7 +341,7 @@
   background: #dbeafe;
   color: #1d4ed8;
   font-size: var(--type-caption);
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .showcase-trace-rail__item--warning > span {
@@ -367,7 +367,7 @@
 .showcase-trace-rail small {
   color: var(--color-text-secondary);
   font-size: 0.72rem;
-  font-weight: 850;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -386,7 +386,7 @@
   padding: 9px 12px;
   text-align: center;
   font-size: var(--type-caption);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -492,14 +492,14 @@
 .showcase-metadata-list dt {
   color: var(--color-text-secondary);
   font-size: var(--type-caption);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 .showcase-metadata-list dd {
   margin: 0;
   color: #172033;
-  font-weight: 850;
+  font-weight: 600;
 }
 
 .showcase-link-button {
@@ -508,7 +508,7 @@
   color: #1d4ed8;
   padding: 0;
   font-size: 0.82rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .showcase-case-preview,
