@@ -1,4 +1,5 @@
 interface ChatComposerProps {
+  isRunning?: boolean;
   message?: string;
   onChange: (value: string) => void;
   onRun: () => void;
@@ -7,6 +8,7 @@ interface ChatComposerProps {
 }
 
 export function ChatComposer({
+  isRunning = false,
   message,
   onChange,
   onRun,
@@ -20,6 +22,7 @@ export function ChatComposer({
         Topic question
       </label>
       <textarea
+        disabled={isRunning}
         id="topic-question"
         onChange={(event) => onChange(event.target.value)}
         placeholder="Ask a question about this topic..."
@@ -27,11 +30,11 @@ export function ChatComposer({
         value={value}
       />
       <div className="composer-actions">
-        <button className="button button--ghost" onClick={onSkills} type="button">
+        <button className="button button--ghost" disabled={isRunning} onClick={onSkills} type="button">
           Skills
         </button>
-        <button className="button button--primary" onClick={onRun} type="button">
-          Run
+        <button className="button button--primary" disabled={isRunning} onClick={onRun} type="button">
+          {isRunning ? "Running..." : "Run"}
         </button>
       </div>
     </section>

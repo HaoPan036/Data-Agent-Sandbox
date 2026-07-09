@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { runAgent } from "./agent/runAgent";
@@ -256,23 +256,32 @@ describe("TopicDetailPage", () => {
     expect(screen.getByText("Selected question is ready to run.")).toBeInTheDocument();
   });
 
-  it("runs deterministic SQL when Run is clicked", () => {
+  it("runs deterministic SQL when Run is clicked", async () => {
     render(<TopicDetailPage topic={topicCatalog[0]} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
 
-    expect(
-      screen.getByText(
-        "Deterministic run completed. SQL, results, chart, trace, and answer are shown below."
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Live execution process")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Running..." })).toBeDisabled();
+    expect(screen.getByText("Input captured")).toBeInTheDocument();
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(
+            "Deterministic run completed. SQL, results, chart, trace, and answer are shown below."
+          )
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
     expect(screen.getByRole("heading", { name: "Final Answer" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Generated SQL" })).toBeInTheDocument();
-    expect(screen.getByText(/SELECT SUM\(revenue\)/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/SELECT SUM\(revenue\)/i).length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "Trace Timeline" })).toBeInTheDocument();
   });
 
-  it("blocks sensitive customer export requests without SQL execution", () => {
+  it("blocks sensitive customer export requests without SQL execution", async () => {
     render(<TopicDetailPage topic={topicCatalog[0]} />);
 
     fireEvent.change(screen.getByLabelText("Topic question"), {
@@ -280,7 +289,14 @@ describe("TopicDetailPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
 
-    expect(screen.getByText("Request blocked by guardrails. See the run details below.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Live execution process")).toBeInTheDocument();
+
+    await waitFor(
+      () => {
+        expect(screen.getByText("Request blocked by guardrails. See the run details below.")).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
     expect(screen.getAllByText(/Blocked by guardrails/i).length).toBeGreaterThan(0);
     expect(screen.getByText("No SQL was generated or executed for this request.")).toBeInTheDocument();
     expect(screen.queryByText(/FROM\s+orders/i)).not.toBeInTheDocument();

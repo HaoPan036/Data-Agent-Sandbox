@@ -42,6 +42,8 @@ The Overview page now exposes a one click deterministic demo. Supported question
 
 It also highlights a prepared Retail Growth Demo topic with a default executable business question and a visible execution process from topic context to result trace.
 
+Topic runs now show a live execution process with a short staged delay. The visible input, generated SQL, validation counts, AlaSQL row counts, and final output all come from the same deterministic AgentRun.
+
 ## Evaluation Dashboard
 
 The Evaluation Dashboard runs versioned testsets through the real deterministic agent. Each case produces an AgentRun, deterministic pass or fail scoring, failure reasons, trace inspection, and optional local bad case review. No LLM judge is called in this version.
@@ -170,6 +172,8 @@ Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟
 首页现在提供一键运行的确定性 demo。支持的问题会走真实 agent 链路，包括意图识别、SQL 生成、SQL 校验、本地执行、Trace、warnings 和基于结果的回答。
 
 首页也会突出展示一个现成的 Retail Growth Demo Topic，包含默认可执行业务问题，并直接展示从 Topic context 到 result trace 的执行过程。
+
+Topic 运行现在会展示带短暂分阶段延迟的 live execution process。可见的输入、生成 SQL、validation 计数、AlaSQL 行数和最终输出都来自同一次确定性 AgentRun。
 
 ## 评估面板
 
