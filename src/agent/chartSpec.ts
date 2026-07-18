@@ -1,4 +1,4 @@
-import type { AgentChartSpec, AgentIntent, ExecutionResult, QueryRow } from "./types";
+import type { AgentChartSpec, AgentIntent, ExecutionResult, QueryRow } from "./types.js";
 
 function resultRows(executionResult: ExecutionResult[], index = 0) {
   return executionResult[index]?.rows ?? [];

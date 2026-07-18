@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { runAgent } from "../src/agent/runAgent";
+import { runAgent } from "../src/agent/runAgent.js";
 import {
   AGENT_RUN_EVENT_VERSION,
   type AgentRunEvent,
   type AgentRunCompletedEvent,
   type AgentRunFailedEvent,
   type AgentRunOptions
-} from "../src/agent/types";
-import { parseRunRequest, type RunRequest } from "./_runRequest";
+} from "../src/agent/types.js";
+import { parseRunRequest, type RunRequest } from "./_runRequest.js";
 
 const encoder = new TextEncoder();
 const NDJSON_CONTENT_TYPE = "application/x-ndjson; charset=utf-8";

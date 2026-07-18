@@ -1,4 +1,4 @@
-import type { AgentIntent, QuestionIntent, SupportedIntentId } from "./types";
+import type { AgentIntent, QuestionIntent, SupportedIntentId } from "./types.js";
 
 interface IntentRule {
   id: SupportedIntentId;

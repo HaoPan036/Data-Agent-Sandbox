@@ -4,7 +4,7 @@ import type {
   AgentTraceStep,
   AgentTraceStepStatus,
   QueryValue
-} from "./types";
+} from "./types.js";
 
 function nowIso() {
   return new Date().toISOString();

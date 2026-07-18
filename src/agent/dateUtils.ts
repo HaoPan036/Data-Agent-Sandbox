@@ -1,4 +1,4 @@
-import { syntheticEcommerce } from "../data/syntheticEcommerce";
+import { syntheticEcommerce } from "../data/syntheticEcommerce.js";
 
 export interface DateRange {
   start: string;

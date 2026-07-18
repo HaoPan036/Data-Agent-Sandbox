@@ -1,10 +1,10 @@
-import { schemaByTable, schemaCatalog, schemaColumnNames, sensitiveColumnNames } from "./schema";
+import { schemaByTable, schemaCatalog, schemaColumnNames, sensitiveColumnNames } from "./schema.js";
 import type {
   AgentSqlStatement,
   AgentValidationResult,
   ValidationIssue,
   ValidationResult
-} from "./types";
+} from "./types.js";
 
 const blockedTerms = [
   "alter",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { handleRunRequest, POST, sanitizeCompletedEvent, SAFE_SQL_EXECUTION_FAILURE } from "./runs";
-import { runAgent } from "../src/agent/runAgent";
-import type { AgentRunCompletedEvent, AgentRunEvent } from "../src/agent/types";
+import { handleRunRequest, POST, sanitizeCompletedEvent, SAFE_SQL_EXECUTION_FAILURE } from "./runs.js";
+import { runAgent } from "../src/agent/runAgent.js";
+import type { AgentRunCompletedEvent, AgentRunEvent } from "../src/agent/types.js";
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 

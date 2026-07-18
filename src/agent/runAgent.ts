@@ -1,11 +1,11 @@
-import { generateBlockedAnswer, generateGroundedAnswer, generateUnknownAnswer } from "./answerGenerator";
-import { buildChartSpec } from "./chartSpec";
-import { classifyIntent } from "./intentRouter";
-import { executeAgentSql } from "./sqlExecutor";
-import { generateAgentSql } from "./sqlGenerator";
-import { hasValidationErrors, validateAgentSql } from "./sqlValidator";
-import { createTraceStep } from "./trace";
-import { AGENT_RUN_EVENT_VERSION } from "./types";
+import { generateBlockedAnswer, generateGroundedAnswer, generateUnknownAnswer } from "./answerGenerator.js";
+import { buildChartSpec } from "./chartSpec.js";
+import { classifyIntent } from "./intentRouter.js";
+import { executeAgentSql } from "./sqlExecutor.js";
+import { generateAgentSql } from "./sqlGenerator.js";
+import { hasValidationErrors, validateAgentSql } from "./sqlValidator.js";
+import { createTraceStep } from "./trace.js";
+import { AGENT_RUN_EVENT_VERSION } from "./types.js";
 import type {
   AgentRun,
   AgentRunClock,
@@ -13,7 +13,7 @@ import type {
   AgentRunOptions,
   AgentTraceStep,
   GuardrailDecision
-} from "./types";
+} from "./types.js";
 
 function createRunId() {
   const webCrypto = globalThis.crypto;

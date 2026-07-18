@@ -1,4 +1,4 @@
-import { campaigns } from "../data/syntheticEcommerce";
+import { campaigns } from "../data/syntheticEcommerce.js";
 import {
   getLastCompleteWeekRange,
   getLastMonthRange,
@@ -7,9 +7,9 @@ import {
   getLatestWeekRange,
   getPreviousPeriodRange,
   isLatestWeekIncomplete
-} from "./dateUtils";
-import { normalizeQuestion } from "./intentRouter";
-import type { AgentIntent, AgentSqlPlan, QuestionIntent, SqlPlan, SupportedIntentId } from "./types";
+} from "./dateUtils.js";
+import { normalizeQuestion } from "./intentRouter.js";
+import type { AgentIntent, AgentSqlPlan, QuestionIntent, SqlPlan, SupportedIntentId } from "./types.js";
 
 const revenueExpression = "SUM(revenue)";
 const profitExpression = "SUM(revenue) - SUM(cost)";

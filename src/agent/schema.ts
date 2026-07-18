@@ -1,4 +1,4 @@
-import type { ColumnType, DatasetSchema, TableColumn } from "./types";
+import type { ColumnType, DatasetSchema, TableColumn } from "./types.js";
 
 function columns(definitions: TableColumn[]) {
   return definitions;

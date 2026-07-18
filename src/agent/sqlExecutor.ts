@@ -1,14 +1,14 @@
 import alasql from "alasql";
-import { syntheticEcommerce, syntheticOrders } from "../data/syntheticEcommerce";
-import { getMonthBucket, getWeekBucket } from "./dateUtils";
-import { hasValidationErrors, validateSql } from "./sqlValidator";
+import { syntheticEcommerce, syntheticOrders } from "../data/syntheticEcommerce.js";
+import { getMonthBucket, getWeekBucket } from "./dateUtils.js";
+import { hasValidationErrors, validateSql } from "./sqlValidator.js";
 import type {
   AgentSqlStatement,
   AgentValidationResult,
   ExecutionResult,
   QueryRow,
   ValidationResult
-} from "./types";
+} from "./types.js";
 
 export function executeSql(
   sql: string,

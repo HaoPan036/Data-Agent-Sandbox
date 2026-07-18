@@ -1,4 +1,4 @@
-import type { AgentIntent, ExecutionResult, GuardrailDecision, QueryRow } from "./types";
+import type { AgentIntent, ExecutionResult, GuardrailDecision, QueryRow } from "./types.js";
 
 function numberValue(row: QueryRow | undefined, key: string) {
   const value = row?.[key];
