@@ -10,5 +10,5 @@
     "noEmit": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["api"]
+  "include": ["api", "src/agent", "src/data", "src/reporting", "src/utils"]
 }

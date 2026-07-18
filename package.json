@@ -16,7 +16,8 @@
     "alasql": "^4.17.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "recharts": "^3.9.2"
+    "recharts": "^3.9.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
