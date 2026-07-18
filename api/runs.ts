@@ -7,7 +7,7 @@ import {
   type AgentRunFailedEvent,
   type AgentRunOptions
 } from "../src/agent/types";
-import { parseRunRequest, type RunRequest } from "./runRequest";
+import { parseRunRequest, type RunRequest } from "./_runRequest";
 
 const encoder = new TextEncoder();
 const NDJSON_CONTENT_TYPE = "application/x-ndjson; charset=utf-8";
