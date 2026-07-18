@@ -58,7 +58,8 @@ export function createTraceStep(
   label: string,
   status: AgentTraceStepStatus,
   message: string,
-  details?: AgentTraceStep["details"]
+  details?: AgentTraceStep["details"],
+  timestamp = nowIso()
 ): AgentTraceStep {
   return {
     id: `${index}`.padStart(2, "0"),
@@ -66,6 +67,6 @@ export function createTraceStep(
     status,
     message,
     details,
-    timestamp: nowIso()
+    timestamp
   };
 }

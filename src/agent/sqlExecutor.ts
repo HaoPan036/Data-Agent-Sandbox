@@ -43,10 +43,12 @@ function now() {
   return typeof performance === "undefined" ? Date.now() : performance.now();
 }
 
-function registerTable(tableName: string, rows: QueryRow[]) {
-  alasql(`DROP TABLE IF EXISTS ${tableName}`);
-  alasql(`CREATE TABLE ${tableName}`);
-  alasql.tables[tableName].data = rows.map((row) => ({ ...row }));
+type AgentSqlDatabase = InstanceType<typeof alasql.Database>;
+
+function registerTable(database: AgentSqlDatabase, tableName: string, rows: QueryRow[]) {
+  database.tables[tableName] = {
+    data: rows.map((row) => ({ ...row }))
+  };
 }
 
 export function buildExecutableTables() {
@@ -77,11 +79,11 @@ export function buildExecutableTables() {
   };
 }
 
-export function registerSyntheticTables() {
+export function registerSyntheticTables(database: AgentSqlDatabase) {
   const tables = buildExecutableTables();
 
   for (const [tableName, rows] of Object.entries(tables)) {
-    registerTable(tableName, rows as QueryRow[]);
+    registerTable(database, tableName, rows as QueryRow[]);
   }
 }
 
@@ -93,34 +95,40 @@ export function executeAgentSql(
     return [];
   }
 
-  registerSyntheticTables();
+  const database = new alasql.Database();
 
-  return statements.map((statement) => {
-    const startedAt = now();
+  try {
+    registerSyntheticTables(database);
 
-    try {
-      const rows = alasql<QueryRow[]>(statement.sql) ?? [];
-      const elapsedMs = Math.round((now() - startedAt) * 100) / 100;
-      const columns = rows[0] ? Object.keys(rows[0]) : [];
+    return statements.map((statement) => {
+      const startedAt = now();
 
-      return {
-        columns,
-        rows,
-        rowCount: rows.length,
-        elapsedMs,
-        isEmpty: rows.length === 0
-      };
-    } catch (error) {
-      const elapsedMs = Math.round((now() - startedAt) * 100) / 100;
+      try {
+        const rows = database.exec<QueryRow[]>(statement.sql) ?? [];
+        const elapsedMs = Math.round((now() - startedAt) * 100) / 100;
+        const columns = rows[0] ? Object.keys(rows[0]) : [];
 
-      return {
-        columns: [],
-        rows: [],
-        rowCount: 0,
-        elapsedMs,
-        isEmpty: true,
-        error: error instanceof Error ? error.message : "Unknown SQL execution error"
-      };
-    }
-  });
+        return {
+          columns,
+          rows,
+          rowCount: rows.length,
+          elapsedMs,
+          isEmpty: rows.length === 0
+        };
+      } catch (error) {
+        const elapsedMs = Math.round((now() - startedAt) * 100) / 100;
+
+        return {
+          columns: [],
+          rows: [],
+          rowCount: 0,
+          elapsedMs,
+          isEmpty: true,
+          error: error instanceof Error ? error.message : "Unknown SQL execution error"
+        };
+      }
+    });
+  } finally {
+    delete alasql.databases[database.databaseid];
+  }
 }

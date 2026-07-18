@@ -198,7 +198,50 @@ export interface AgentRun {
   createdAt: string;
 }
 
+export const AGENT_RUN_EVENT_VERSION = 1 as const;
+
+export type AgentRunEventVersion = typeof AGENT_RUN_EVENT_VERSION;
+export type AgentRunClock = () => number;
+
+export interface AgentRunEventBase<TType extends string> {
+  version: AgentRunEventVersion;
+  runId: string;
+  sequence: number;
+  type: TType;
+  timestamp: string;
+  elapsedMs: number;
+  durationMs: number;
+}
+
+export interface AgentRunStartedEvent extends AgentRunEventBase<"run.started"> {
+  question: string;
+  topicId: string;
+}
+
+export interface AgentStepCompletedEvent extends AgentRunEventBase<"step.completed"> {
+  step: AgentTraceStep;
+}
+
+export interface AgentRunCompletedEvent extends AgentRunEventBase<"run.completed"> {
+  run: AgentRun;
+}
+
+export interface AgentRunFailedEvent extends AgentRunEventBase<"run.failed"> {
+  error: {
+    name: string;
+    message: string;
+  };
+}
+
+export type AgentRunEvent =
+  | AgentRunStartedEvent
+  | AgentStepCompletedEvent
+  | AgentRunCompletedEvent
+  | AgentRunFailedEvent;
+
 export interface AgentRunOptions {
   runId?: string;
   createdAt?: string;
+  onEvent?: (event: AgentRunEvent) => void;
+  clock?: AgentRunClock;
 }
