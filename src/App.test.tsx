@@ -38,17 +38,34 @@ function replaceTerminalRun(events: AgentRunEvent[], run: AgentRun) {
   );
 }
 
-function terminalOnlyEvents(events: AgentRunEvent[], run: AgentRun): AgentRunEvent[] {
+function eventsForTerminalRun(events: AgentRunEvent[], run: AgentRun): AgentRunEvent[] {
   const started = events.find((event) => event.type === "run.started");
   const completed = events.find((event) => event.type === "run.completed");
+  const stepEvents = events.filter((event) => event.type === "step.completed");
 
   if (started?.type !== "run.started" || completed?.type !== "run.completed") {
     throw new Error("Expected a started and completed event fixture.");
   }
 
+  const streamedSteps: AgentRunEvent[] = run.traceSteps.map((step, index) => {
+    const template = stepEvents[index] ?? completed;
+
+    return {
+      version: template.version,
+      runId: run.runId,
+      sequence: index + 2,
+      type: "step.completed",
+      timestamp: step.timestamp,
+      elapsedMs: template.elapsedMs,
+      durationMs: template.durationMs,
+      step
+    };
+  });
+
   return [
-    { ...started, sequence: 1 },
-    { ...completed, run, sequence: 2 }
+    { ...started, runId: run.runId, sequence: 1 },
+    ...streamedSteps,
+    { ...completed, runId: run.runId, run, sequence: streamedSteps.length + 2 }
   ];
 }
 
@@ -295,7 +312,7 @@ describe("ShowcasePage", () => {
     const failedRun = failedReviewRun(fixture.run);
     const fetchMock = vi.fn(() =>
       Promise.resolve(
-        responseFor(terminalOnlyEvents(fixture.events, failedRun), failedRun.runId)
+        responseFor(eventsForTerminalRun(fixture.events, failedRun), failedRun.runId)
       )
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -346,7 +363,7 @@ describe("ShowcasePage", () => {
       userQuestion: fixture.run.userQuestion,
       finalAnswer: "An unexpected row-level result was returned."
     };
-    const events = replaceTerminalRun(fixture.events, anomalousRun);
+    const events = eventsForTerminalRun(fixture.events, anomalousRun);
     const fetchMock = vi.fn(() => Promise.resolve(responseFor(events, anomalousRun.runId)));
     vi.stubGlobal("fetch", fetchMock);
     window.history.pushState({}, "", "/showcase?view=guardrail");
@@ -485,7 +502,7 @@ describe("QuickDemoRunner", () => {
     };
     const fetchMock = vi.fn(() =>
       Promise.resolve(
-        responseFor(terminalOnlyEvents(fixture.events, reviewRun), reviewRun.runId)
+        responseFor(eventsForTerminalRun(fixture.events, reviewRun), reviewRun.runId)
       )
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -512,7 +529,7 @@ describe("QuickDemoRunner", () => {
     const failedRun = failedReviewRun(fixture.run);
     const fetchMock = vi.fn(() =>
       Promise.resolve(
-        responseFor(terminalOnlyEvents(fixture.events, failedRun), failedRun.runId)
+        responseFor(eventsForTerminalRun(fixture.events, failedRun), failedRun.runId)
       )
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -693,7 +710,7 @@ describe("TopicDetailPage", () => {
     const failedRun = failedReviewRun(fixture.run);
     const fetchMock = vi.fn(() =>
       Promise.resolve(
-        responseFor(terminalOnlyEvents(fixture.events, failedRun), failedRun.runId)
+        responseFor(eventsForTerminalRun(fixture.events, failedRun), failedRun.runId)
       )
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -733,7 +750,7 @@ describe("TopicDetailPage", () => {
     };
     const fetchMock = vi.fn(() =>
       Promise.resolve(
-        responseFor(terminalOnlyEvents(fixture.events, reviewRun), reviewRun.runId)
+        responseFor(eventsForTerminalRun(fixture.events, reviewRun), reviewRun.runId)
       )
     );
     vi.stubGlobal("fetch", fetchMock);

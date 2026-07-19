@@ -132,6 +132,106 @@ describe("streamAgentRun", () => {
     expect(seen.at(-1)).toBe(terminal);
   });
 
+  it("accepts a completion trace that exactly matches streamed steps in order", async () => {
+    const events = await realEvents();
+    const seen: AgentRunEvent[] = [];
+    const terminal = await streamAgentRun(
+      "What was total revenue last week?",
+      "retail-growth-demo",
+      {
+        fetchImpl: fetchReturning(responseFor(events)),
+        onEvent: (event) => {
+          seen.push(event);
+        }
+      }
+    );
+
+    expect(terminal.type).toBe("run.completed");
+    if (terminal.type === "run.completed") {
+      expect(
+        seen
+          .filter((event) => event.type === "step.completed")
+          .map((event) => event.step)
+      ).toEqual(terminal.run.traceSteps);
+    }
+  });
+
+  it("isolates trace validation from callback mutations", async () => {
+    const events = await realEvents();
+    const completion = events.at(-1) as Extract<AgentRunEvent, { type: "run.completed" }>;
+    let mutatedMessage = false;
+    let mutatedDetailsArray = false;
+
+    const terminal = await streamAgentRun(
+      "What was total revenue last week?",
+      "retail-growth-demo",
+      {
+        fetchImpl: fetchReturning(responseFor(events)),
+        onEvent: (event) => {
+          if (event.type !== "step.completed") {
+            return;
+          }
+
+          if (!mutatedMessage) {
+            event.step.message = "Changed by the event consumer.";
+            mutatedMessage = true;
+          }
+
+          if (!mutatedDetailsArray) {
+            const arrayDetail = Object.values(event.step.details ?? {}).find(Array.isArray);
+
+            if (arrayDetail) {
+              (arrayDetail as unknown[]).push("changed-by-consumer");
+              mutatedDetailsArray = true;
+            }
+          }
+        }
+      }
+    );
+
+    expect(mutatedMessage).toBe(true);
+    expect(mutatedDetailsArray).toBe(true);
+    expect(terminal).toEqual(completion);
+  });
+
+  it("rejects missing, reordered, altered, or extra terminal trace steps", async () => {
+    const events = await realEvents();
+    const completion = events.at(-1) as Extract<AgentRunEvent, { type: "run.completed" }>;
+    const traceSteps = completion.run.traceSteps;
+    const firstStep = traceSteps[0];
+
+    if (!firstStep || traceSteps.length < 2) {
+      throw new Error("Expected multiple trace steps from the real agent run.");
+    }
+
+    const mismatches = [
+      traceSteps.slice(1),
+      [traceSteps[1], traceSteps[0], ...traceSteps.slice(2)],
+      [{ ...firstStep, message: `${firstStep.message} altered` }, ...traceSteps.slice(1)],
+      [...traceSteps, { ...firstStep, id: "trace-extra" }]
+    ];
+
+    for (const candidateTrace of mismatches) {
+      const seen: AgentRunEvent[] = [];
+      const candidate = {
+        ...completion,
+        run: { ...completion.run, traceSteps: candidateTrace }
+      };
+
+      await expectClientError(
+        streamAgentRun("What was total revenue last week?", "retail-growth-demo", {
+          fetchImpl: fetchReturning(responseFor([...events.slice(0, -1), candidate])),
+          onEvent: (event) => {
+            seen.push(event);
+          }
+        }),
+        "INVALID_RESPONSE"
+      );
+
+      expect(seen.some((event) => event.type === "run.completed")).toBe(false);
+    }
+  });
+
   it("never delivers a completion callback when data follows the terminal event", async () => {
     const events = await realEvents();
     const trailingEvent = { ...events[0], sequence: events.length + 1 };

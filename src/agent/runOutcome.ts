@@ -1,4 +1,4 @@
-import type { AgentRun, GuardrailDecision } from "./types";
+import type { AgentRun, GuardrailDecision } from "./types.js";
 
 export type GuardrailTone = "green" | "amber" | "red";
 export type NoSqlOutcome =

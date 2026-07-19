@@ -108,7 +108,12 @@ export function HomePage() {
                 rows={12}
                 value={reportDraft}
               />
-              <iframe className="report-preview" srcDoc={reportDraft} title="Report preview" />
+              <iframe
+                className="report-preview"
+                sandbox=""
+                srcDoc={reportDraft}
+                title="Report preview"
+              />
             </section>
           </div>
 
@@ -183,4 +188,3 @@ export function HomePage() {
     </main>
   );
 }
-

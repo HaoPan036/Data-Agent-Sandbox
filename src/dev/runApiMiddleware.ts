@@ -2,6 +2,7 @@ import { Readable } from "node:stream";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin, PreviewServer, ViteDevServer } from "vite";
 import { handleRunRequest } from "../../api/runs.js";
+import { AGENT_API_SECURITY_HEADERS } from "../agent/protocol";
 
 const RUNS_PATH = "/api/runs";
 const METHOD_NOT_ALLOWED = JSON.stringify({
@@ -69,7 +70,10 @@ function writeStableJson(
 
   response.statusCode = status;
   response.setHeader("Content-Type", "application/json; charset=utf-8");
-  response.setHeader("Cache-Control", "no-store");
+
+  for (const [name, value] of Object.entries(AGENT_API_SECURITY_HEADERS)) {
+    response.setHeader(name, value);
+  }
 
   for (const [name, value] of Object.entries(headers)) {
     response.setHeader(name, value);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AgentClientError, streamAgentRun } from "../agent/agentClient";
+import { AGENT_TRANSPORT_ID } from "../agent/protocol";
 import { deriveRunOutcome } from "../agent/runOutcome";
 import type {
   AgentRun,
@@ -72,7 +73,7 @@ function startedStep(event: Extract<AgentRunEvent, { type: "run.started" }>): Ex
     label: "Run accepted by server",
     status: "completed",
     detail: "The server accepted this question and opened a deterministic agent run.",
-    artifact: `Run ID: ${event.runId}\nTopic: ${event.topicId}\nTransport: ndjson-v1`
+    artifact: `Run ID: ${event.runId}\nTopic: ${event.topicId}\nTransport: ${AGENT_TRANSPORT_ID}`
   };
 }
 
@@ -205,7 +206,7 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
       }
 
       setRunId(event.runId);
-      setTransport("ndjson-v1");
+      setTransport(AGENT_TRANSPORT_ID);
 
       if (event.type === "run.started") {
         setProgressSteps([startedStep(event)]);

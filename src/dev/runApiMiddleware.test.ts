@@ -131,6 +131,8 @@ describe("local /api/runs middleware", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toContain("application/x-ndjson");
+    expect(response.headers.get("cross-origin-resource-policy")).toBe("same-origin");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
     expect(events[0]?.type).toBe("run.started");
     expect(events.at(-1)?.type).toBe("run.completed");
     expect(events.at(-1)?.run?.generatedSql?.[0]?.sql).toContain("SELECT");
@@ -144,6 +146,9 @@ describe("local /api/runs middleware", () => {
 
     expect(response.status).toBe(405);
     expect(response.headers.get("allow")).toBe("POST");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("cross-origin-resource-policy")).toBe("same-origin");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
     expect(await response.json()).toEqual({
       code: "METHOD_NOT_ALLOWED",
       message: "Method not allowed."

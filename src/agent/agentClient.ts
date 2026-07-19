@@ -3,10 +3,12 @@ import type {
   AgentRunCompletedEvent,
   AgentRunEvent,
   AgentRunFailedEvent,
+  AgentTraceStep,
   AgentTraceStepStatus,
   QueryValue
-} from "./types";
-import { deriveRunOutcome } from "./runOutcome";
+} from "./types.js";
+import { deriveRunOutcome } from "./runOutcome.js";
+import { AGENT_NDJSON_MEDIA_TYPE, AGENT_TRANSPORT_ID } from "./protocol.js";
 
 export type AgentClientErrorCode =
   | "HTTP_ERROR"
@@ -37,8 +39,6 @@ export interface StreamAgentRunOptions {
   fetchImpl?: typeof fetch;
 }
 
-const NDJSON_CONTENT_TYPE = "application/x-ndjson";
-const AGENT_TRANSPORT = "ndjson-v1";
 const TERMINAL_EVENT_TYPES = new Set(["run.completed", "run.failed"]);
 const AGENT_RUN_STATUSES = new Set(["idle", "running", "completed", "blocked", "failed"]);
 const COMPLETED_EVENT_RUN_STATUSES = new Set(["completed", "blocked", "failed"]);
@@ -60,6 +60,14 @@ const TRACE_STEP_STATUSES = new Set<AgentTraceStepStatus>([
   "blocked",
   "failed",
   "warning"
+]);
+const TRACE_STEP_KEYS = new Set([
+  "id",
+  "label",
+  "status",
+  "message",
+  "details",
+  "timestamp"
 ]);
 const CHART_TYPES = new Set(["kpi", "bar", "line", "table", "status"]);
 
@@ -163,6 +171,7 @@ function isTraceStep(value: unknown): boolean {
   }
 
   return (
+    Object.keys(value).every((key) => TRACE_STEP_KEYS.has(key)) &&
     isNonEmptyString(value.id) &&
     isNonEmptyString(value.label) &&
     typeof value.status === "string" &&
@@ -345,7 +354,79 @@ function protocolError(error: unknown) {
 }
 
 function contentTypeIsNdjson(response: Response) {
-  return response.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase() === NDJSON_CONTENT_TYPE;
+  return response.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase() === AGENT_NDJSON_MEDIA_TYPE;
+}
+
+function detailValuesEqual(
+  left: QueryValue | QueryValue[] | string[] | number[] | boolean[],
+  right: QueryValue | QueryValue[] | string[] | number[] | boolean[]
+) {
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return (
+      Array.isArray(left) &&
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((value, index) => Object.is(value, right[index]))
+    );
+  }
+
+  return Object.is(left, right);
+}
+
+function traceDetailsEqual(
+  left: AgentTraceStep["details"],
+  right: AgentTraceStep["details"]
+) {
+  if (left === undefined || right === undefined) {
+    return left === right;
+  }
+
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every(
+      (key) =>
+        Object.prototype.hasOwnProperty.call(right, key) &&
+        detailValuesEqual(left[key], right[key])
+    )
+  );
+}
+
+function traceStepsEqual(left: AgentTraceStep[], right: AgentTraceStep[]) {
+  return (
+    left.length === right.length &&
+    left.every((step, index) => {
+      const candidate = right[index];
+
+      return (
+        candidate !== undefined &&
+        step.id === candidate.id &&
+        step.label === candidate.label &&
+        step.status === candidate.status &&
+        step.message === candidate.message &&
+        step.timestamp === candidate.timestamp &&
+        traceDetailsEqual(step.details, candidate.details)
+      );
+    })
+  );
+}
+
+function snapshotTraceStep(step: AgentTraceStep): AgentTraceStep {
+  const details = step.details
+    ? Object.fromEntries(
+        Object.entries(step.details).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? [...value] : value
+        ])
+      ) as AgentTraceStep["details"]
+    : undefined;
+
+  return {
+    ...step,
+    ...(details === undefined ? {} : { details })
+  };
 }
 
 async function cancelReader(reader: ReadableStreamDefaultReader<Uint8Array>) {
@@ -385,7 +466,7 @@ export async function streamAgentRun(
     response = await fetcher("/api/runs", {
       method: "POST",
       headers: {
-        Accept: NDJSON_CONTENT_TYPE,
+        Accept: AGENT_NDJSON_MEDIA_TYPE,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ question, topicId }),
@@ -403,7 +484,7 @@ export async function streamAgentRun(
     throw new AgentClientError("HTTP_ERROR", "Agent request was rejected.", response.status);
   }
 
-  if (!contentTypeIsNdjson(response) || response.headers.get("x-agent-transport") !== AGENT_TRANSPORT) {
+  if (!contentTypeIsNdjson(response) || response.headers.get("x-agent-transport") !== AGENT_TRANSPORT_ID) {
     await cancelResponseBody(response);
     throw new AgentClientError("INVALID_RESPONSE", "Agent returned an unsupported response.", response.status);
   }
@@ -427,6 +508,7 @@ export async function streamAgentRun(
   const runId = responseRunId;
   let receivedBytes = 0;
   let eventCount = 0;
+  const streamedTraceSteps: AgentTraceStep[] = [];
   let terminal: AgentRunCompletedEvent | AgentRunFailedEvent | undefined;
   let terminalSeen = false;
   const abortListener = signal
@@ -505,7 +587,21 @@ export async function streamAgentRun(
       throw new AgentClientError("INVALID_RESPONSE", "Agent completion did not match the requested run.");
     }
 
+    if (
+      event.type === "run.completed" &&
+      !traceStepsEqual(streamedTraceSteps, event.run.traceSteps)
+    ) {
+      throw new AgentClientError(
+        "INVALID_RESPONSE",
+        "Agent completion trace did not match the streamed steps."
+      );
+    }
+
     expectedSequence += 1;
+
+    if (event.type === "step.completed") {
+      streamedTraceSteps.push(snapshotTraceStep(event.step));
+    }
 
     if (TERMINAL_EVENT_TYPES.has(event.type)) {
       terminalSeen = true;

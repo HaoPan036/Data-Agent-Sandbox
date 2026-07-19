@@ -1,4 +1,9 @@
 import { randomUUID } from "node:crypto";
+import {
+  AGENT_API_SECURITY_HEADERS,
+  AGENT_NDJSON_CONTENT_TYPE,
+  AGENT_TRANSPORT_ID
+} from "../src/agent/protocol.js";
 import { runAgent } from "../src/agent/runAgent.js";
 import {
   AGENT_RUN_EVENT_VERSION,
@@ -10,19 +15,24 @@ import {
 import { parseRunRequest, type RunRequest } from "./_runRequest.js";
 
 const encoder = new TextEncoder();
-const NDJSON_CONTENT_TYPE = "application/x-ndjson; charset=utf-8";
 const SAFE_AGENT_FAILURE = {
   name: "AgentError",
   message: "The agent run could not be completed."
 };
 export const SAFE_SQL_EXECUTION_FAILURE = "SQL execution failed.";
 
-function jsonError(status: 400 | 413 | 415, code: string, message: string) {
+function jsonError(
+  status: 400 | 405 | 413 | 415,
+  code: string,
+  message: string,
+  headers: Record<string, string> = {}
+) {
   return new Response(JSON.stringify({ code, message }), {
     status,
     headers: {
+      ...AGENT_API_SECURITY_HEADERS,
       "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store"
+      ...headers
     }
   });
 }
@@ -204,6 +214,12 @@ export async function handleRunRequest(
   request: Request,
   runner: AgentRunner = runAgent
 ): Promise<Response> {
+  if (request.method !== "POST") {
+    return jsonError(405, "METHOD_NOT_ALLOWED", "Method not allowed.", {
+      Allow: "POST"
+    });
+  }
+
   const parsedRequest = await parseRunRequest(request);
 
   if (!parsedRequest.ok) {
@@ -216,9 +232,9 @@ export async function handleRunRequest(
   return new Response(stream, {
     status: 200,
     headers: {
-      "Content-Type": NDJSON_CONTENT_TYPE,
-      "Cache-Control": "no-store",
-      "X-Agent-Transport": "ndjson-v1",
+      ...AGENT_API_SECURITY_HEADERS,
+      "Content-Type": AGENT_NDJSON_CONTENT_TYPE,
+      "X-Agent-Transport": AGENT_TRANSPORT_ID,
       "X-Run-Id": runId
     }
   });

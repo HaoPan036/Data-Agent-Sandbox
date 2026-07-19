@@ -61,6 +61,8 @@ describe("POST /api/runs", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/x-ndjson; charset=utf-8");
     expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(response.headers.get("Cross-Origin-Resource-Policy")).toBe("same-origin");
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(response.headers.get("X-Agent-Transport")).toBe("ndjson-v1");
 
     const runId = response.headers.get("X-Run-Id");
@@ -173,9 +175,27 @@ describe("POST /api/runs", () => {
       expect(response.status).toBe(testCase.status);
       expect(response.headers.get("Content-Type")).toBe("application/json; charset=utf-8");
       expect(response.headers.get("Cache-Control")).toBe("no-store");
+      expect(response.headers.get("Cross-Origin-Resource-Policy")).toBe("same-origin");
+      expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
       expect(body.code).toBe(testCase.code);
       expect(body.message).not.toContain("x".repeat(501));
     }
+  });
+
+  it("returns a secured method response when the handler receives a non-POST request", async () => {
+    const response = await handleRunRequest(
+      new Request("http://localhost/api/runs", { method: "GET" })
+    );
+
+    expect(response.status).toBe(405);
+    expect(response.headers.get("Allow")).toBe("POST");
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(response.headers.get("Cross-Origin-Resource-Policy")).toBe("same-origin");
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    expect(await response.json()).toEqual({
+      code: "METHOD_NOT_ALLOWED",
+      message: "Method not allowed."
+    });
   });
 
   it("rejects bodies over the byte limit using content length and actual bytes", async () => {
