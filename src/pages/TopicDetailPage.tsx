@@ -1,8 +1,14 @@
-import { useRef, useState } from "react";
-import { runAgent } from "../agent/runAgent";
-import type { AgentRun } from "../agent/types";
+import { useEffect, useRef, useState } from "react";
+import { AgentClientError, streamAgentRun } from "../agent/agentClient";
+import { deriveRunOutcome } from "../agent/runOutcome";
+import type {
+  AgentRun,
+  AgentRunCompletedEvent,
+  AgentRunEvent
+} from "../agent/types";
 import {
   ExecutionProgressPanel,
+  type ExecutionProgressStatus,
   type ExecutionProgressStep
 } from "../components/execution/ExecutionProgressPanel";
 import { ExecutionResultPanel } from "../components/execution/ExecutionResultPanel";
@@ -53,95 +59,70 @@ function executionCallout(topicId: string) {
     return "Metadata only. Retrieval execution planned later.";
   }
 
-  return "Supported now: This topic can execute selected deterministic questions end to end.";
+  return "Supported now: This topic can execute selected deterministic questions end to end through the agent API.";
 }
 
-const runStepDelayMs = 420;
-
-function wait(ms: number) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
+function formatDetails(details: Record<string, unknown> | undefined) {
+  return details ? JSON.stringify(details, null, 2) : undefined;
 }
 
-function titleCase(value: string) {
-  return value
-    .replaceAll("_", " ")
-    .split(" ")
-    .map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
+function startedStep(event: Extract<AgentRunEvent, { type: "run.started" }>): ExecutionProgressStep {
+  return {
+    id: `server-start-${event.sequence}`,
+    label: "Run accepted by server",
+    status: "completed",
+    detail: "The server accepted this question and opened a deterministic agent run.",
+    artifact: `Run ID: ${event.runId}\nTopic: ${event.topicId}\nTransport: ndjson-v1`
+  };
 }
 
-function rowCount(run: AgentRun) {
-  return run.executionResult.reduce((total, result) => total + result.rowCount, 0);
+function traceStep(event: Extract<AgentRunEvent, { type: "step.completed" }>): ExecutionProgressStep {
+  return {
+    id: event.step.id,
+    label: event.step.label,
+    status: event.step.status,
+    detail: event.step.message,
+    artifact: formatDetails(event.step.details)
+  };
 }
 
-function createExecutionSteps(input: string, topic: Topic, run: AgentRun): ExecutionProgressStep[] {
-  const passedChecks = run.validationResults.filter((result) => result.passed).length;
-  const validationStatus = run.validationResults.some((result) => result.severity === "error" && !result.passed)
-    ? "failed"
-    : run.validationResults.some((result) => !result.passed)
-      ? "warning"
-      : "completed";
-  const sqlArtifact =
-    run.generatedSql.length > 0
-      ? run.generatedSql.map((statement) => statement.sql).join("\n\n")
-      : "No SQL generated for this request.";
-  const executionRows = rowCount(run);
+function statusFromRun(run: AgentRun): ExecutionProgressStatus {
+  return run.status === "idle" || run.status === "running" ? "completed" : run.status;
+}
 
-  return [
-    {
-      id: "input",
-      label: "Input captured",
-      status: "completed",
-      detail: input,
-      artifact: `Topic: ${topic.name}\nSource: ${topic.sourceType}`
-    },
-    {
-      id: "intent",
-      label: "Intent routed",
-      status: run.intent === "unknown" ? "warning" : "completed",
-      detail: `Intent: ${titleCase(run.intent)}. Guardrail decision: ${titleCase(run.guardrailDecision)}.`
-    },
-    {
-      id: "sql",
-      label: "SQL generated",
-      status: run.generatedSql.length > 0 ? "completed" : run.guardrailDecision === "blocked" ? "blocked" : "warning",
-      detail:
-        run.generatedSql.length > 0
-          ? `Generated ${run.generatedSql.length} read-only SQL statement(s).`
-          : "The agent did not generate SQL for this request.",
-      artifact: sqlArtifact
-    },
-    {
-      id: "validation",
-      label: "SQL validated",
-      status: run.validationResults.length > 0 ? validationStatus : run.guardrailDecision === "blocked" ? "blocked" : "warning",
-      detail:
-        run.validationResults.length > 0
-          ? `${passedChecks}/${run.validationResults.length} validation checks passed.`
-          : "No validation checks were needed because SQL generation stopped."
-    },
-    {
-      id: "execution",
-      label: "SQL executed",
-      status: run.executionResult.length > 0 ? "completed" : run.guardrailDecision === "blocked" ? "blocked" : "warning",
-      detail:
-        run.executionResult.length > 0
-          ? `AlaSQL returned ${executionRows} row(s) from synthetic browser tables.`
-          : "No SQL execution was performed.",
-      artifact:
-        run.executionResult.length > 0
-          ? `Rows: ${executionRows}\nTables: ${run.selectedTables.join(", ")}`
-          : undefined
-    },
-    {
-      id: "output",
-      label: "Output produced",
-      status: run.status === "blocked" ? "blocked" : run.status === "failed" ? "failed" : "completed",
-      detail: run.finalAnswer
-    }
-  ];
+function completionMessage(run: AgentRun) {
+  const outcome = deriveRunOutcome(run);
+
+  if (outcome.isSafelyBlocked) {
+    return "Request blocked by guardrails. No SQL was generated or executed.";
+  }
+
+  if (run.status === "failed") {
+    return "The server completed the run with a failure. Retry the same question to try again.";
+  }
+
+  if (outcome.hasOutcomeIntegrityMismatch) {
+    return "Outcome integrity validation failed. No result should be used until the server response is reviewed.";
+  }
+
+  if (run.guardrailDecision === "needs_review") {
+    return "Run completed with a needs-review guardrail decision. Review the warnings, trace, and returned artifacts below.";
+  }
+
+  if (!outcome.hasGeneratedSql) {
+    return "Run completed without generating SQL. Review the trace and suggested follow-ups below.";
+  }
+
+  return "Server run completed. SQL, results, chart, trace, and answer are shown below.";
+}
+
+function failureStep(message: string): ExecutionProgressStep {
+  return {
+    id: "client-failure",
+    label: "Run failed",
+    status: "failed",
+    detail: message
+  };
 }
 
 export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: TopicDetailPageProps) {
@@ -154,7 +135,41 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
   const [isRunning, setIsRunning] = useState(false);
   const [runInput, setRunInput] = useState("");
   const [progressSteps, setProgressSteps] = useState<ExecutionProgressStep[]>([]);
+  const [runStatus, setRunStatus] = useState<ExecutionProgressStatus | undefined>();
+  const [runId, setRunId] = useState<string>();
+  const [transport, setTransport] = useState<string>();
   const runSequence = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      runSequence.current += 1;
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  function clearOutput() {
+    setIsRunning(false);
+    setAgentRun(undefined);
+    setProgressSteps([]);
+    setRunStatus(undefined);
+    setRunId(undefined);
+    setTransport(undefined);
+  }
+
+  function cancelCurrentRun() {
+    if (!isRunning) {
+      return;
+    }
+
+    runSequence.current += 1;
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setIsRunning(false);
+    setAgentRun(undefined);
+    setRunStatus("cancelled");
+    setMessage("Client stopped receiving events. A synchronous server computation may have continued; retry to run again.");
+  }
 
   async function handleRun() {
     const input = selectedQuestion.trim();
@@ -164,52 +179,80 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
       return;
     }
 
-    const sequence = runSequence.current + 1;
-    runSequence.current = sequence;
-    setAgentRun(undefined);
-    setProgressSteps([]);
-    setRunInput(input);
-    setIsRunning(true);
-    setMessage("Running deterministic agent. Follow each execution step below.");
-
-    const run = runAgent(input, topic.id);
-    const nextSteps = createExecutionSteps(input, topic, run);
-
-    for (const step of nextSteps) {
-      if (sequence !== runSequence.current) {
-        return;
-      }
-
-      setProgressSteps((currentSteps) => [...currentSteps, { ...step, status: "running" }]);
-      await wait(runStepDelayMs);
-
-      if (sequence !== runSequence.current) {
-        return;
-      }
-
-      setProgressSteps((currentSteps) =>
-        currentSteps.map((candidate) => (candidate.id === step.id ? step : candidate))
-      );
-    }
-
-    if (sequence !== runSequence.current) {
+    if (topic.id === "knowledge-base-demo") {
+      setMessage("Knowledge Base Demo is metadata-only in this stage. No agent run was started.");
+      clearOutput();
       return;
     }
 
-    setAgentRun(run);
-    setIsRunning(false);
-    setMessage(
-      run.status === "blocked"
-        ? "Request blocked by guardrails. See the run details below."
-        : run.generatedSql.length === 0
-          ? "No executable SQL workflow matched this request. See suggestions below."
-        : "Deterministic run completed. SQL, results, chart, trace, and answer are shown below."
-    );
+    abortControllerRef.current?.abort();
+    const sequence = runSequence.current + 1;
+    runSequence.current = sequence;
+    clearOutput();
+    setProgressSteps([]);
+    setRunInput(input);
+    setIsRunning(true);
+    setRunStatus("running");
+    setMessage("Connected to the server. Waiting for execution events...");
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const isCurrentRun = () => sequence === runSequence.current;
+    const onEvent = (event: AgentRunEvent) => {
+      if (!isCurrentRun()) {
+        return;
+      }
+
+      setRunId(event.runId);
+      setTransport("ndjson-v1");
+
+      if (event.type === "run.started") {
+        setProgressSteps([startedStep(event)]);
+      } else if (event.type === "step.completed") {
+        setProgressSteps((currentSteps) => [...currentSteps, traceStep(event)]);
+      } else if (event.type === "run.completed") {
+        const terminalEvent = event as AgentRunCompletedEvent;
+        setAgentRun(terminalEvent.run);
+        setRunStatus(statusFromRun(terminalEvent.run));
+        setIsRunning(false);
+        setMessage(completionMessage(terminalEvent.run));
+      } else {
+        setAgentRun(undefined);
+        setRunStatus("failed");
+        setIsRunning(false);
+        setProgressSteps((currentSteps) => [...currentSteps, failureStep("The server returned a safe failure response.")]);
+        setMessage("The server could not complete this run. Retry the same question.");
+      }
+    };
+
+    try {
+      await streamAgentRun(input, topic.id, { signal: controller.signal, onEvent });
+    } catch (error) {
+      if (!isCurrentRun()) {
+        return;
+      }
+
+      setIsRunning(false);
+      setAgentRun(undefined);
+      if (error instanceof AgentClientError && error.code === "ABORTED") {
+        setRunStatus("cancelled");
+        setMessage("Client stopped receiving events. A synchronous server computation may have continued; retry to run again.");
+      } else {
+        setRunStatus("failed");
+        setProgressSteps((currentSteps) => [...currentSteps, failureStep("The server response was not available.")]);
+        setMessage("The run failed before completion. Retry the same question.");
+      }
+    } finally {
+      if (isCurrentRun()) {
+        abortControllerRef.current = null;
+      }
+    }
   }
 
   function handleSkills() {
     setMessage(
-      "Reusable Skills are represented in the topic layer. The deterministic runner now uses local SQL templates and public metric metadata."
+      "Reusable Skills are represented in the topic layer. The deterministic runner now uses versioned SQL templates and public metric metadata."
     );
   }
 
@@ -238,8 +281,9 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
               onSelectQuestion={(question) => {
                 setSelectedQuestion(question);
                 setMessage("Selected question is ready to run.");
-                setAgentRun(undefined);
-                setProgressSteps([]);
+                abortControllerRef.current?.abort();
+                runSequence.current += 1;
+                clearOutput();
                 setRunInput("");
               }}
               questions={topic.sampleQuestions}
@@ -248,17 +292,21 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
             />
 
             <ChatComposer
+              canRun={topic.id !== "knowledge-base-demo"}
               isRunning={isRunning}
               message={message}
               onChange={(value) => {
                 setSelectedQuestion(value);
                 setMessage("");
-                setAgentRun(undefined);
-                setProgressSteps([]);
+                abortControllerRef.current?.abort();
+                runSequence.current += 1;
+                clearOutput();
                 setRunInput("");
               }}
+              onCancel={cancelCurrentRun}
               onSkills={handleSkills}
               onRun={handleRun}
+              showRetry={runStatus === "failed" || runStatus === "cancelled"}
               value={selectedQuestion}
             />
             <div className="topic-execution-callout">{executionCallout(topic.id)}</div>
@@ -273,7 +321,11 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
               <ExecutionProgressPanel
                 input={runInput}
                 isRunning={isRunning}
+                output={agentRun?.finalAnswer}
+                runId={runId}
+                status={runStatus}
                 steps={progressSteps}
+                transport={transport}
               />
             ) : null}
 
@@ -307,7 +359,7 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
           <>
             <TopicHealthCard topic={topic} />
             <EmptyState title="Execution Coverage">
-              Retail Growth Demo and Experiment Metrics Demo execute deterministic SQL locally.
+              Retail Growth Demo and Experiment Metrics Demo execute deterministic SQL through the agent API/serverless function.
               Knowledge Base Demo remains metadata-only in this stage.
             </EmptyState>
           </>
@@ -318,7 +370,7 @@ export function TopicDetailPage({ initialQuestion, onOpenEvaluation, topic }: To
         <RightContents items={contents} />
         <TopicHealthCard topic={topic} />
         <EmptyState title="Execution Coverage">
-          Retail Growth Demo and Experiment Metrics Demo execute deterministic SQL locally.
+          Retail Growth Demo and Experiment Metrics Demo execute deterministic SQL through the agent API/serverless function.
           Knowledge Base Demo remains metadata-only in this stage.
         </EmptyState>
         {onOpenEvaluation ? (

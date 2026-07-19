@@ -675,11 +675,16 @@ pre {
   font-size: 0.92rem;
 }
 
+.quick-demo-status,
 .quick-demo-copy-status,
 .quick-demo-no-sql {
   margin-bottom: 0;
   color: var(--color-text-secondary);
   font-size: 0.86rem;
+}
+
+.quick-demo-status {
+  min-height: 1.3em;
 }
 
 .quick-demo-result {
@@ -1790,6 +1795,7 @@ pre {
 
 .composer-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-sm);
 }
 
@@ -1820,6 +1826,19 @@ pre {
 
 .execution-progress-panel__header h2 {
   margin-bottom: 0;
+}
+
+.execution-run-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--type-caption);
+}
+
+.execution-run-meta span {
+  overflow-wrap: anywhere;
 }
 
 .execution-io-grid {
@@ -1902,6 +1921,11 @@ pre {
 .execution-progress-step--failed .execution-progress-step__body {
   border-color: #fecaca;
   background: #fef2f2;
+}
+
+.execution-progress-step--cancelled .execution-progress-step__body {
+  border-color: #fde68a;
+  background: #fffbeb;
 }
 
 .execution-progress-step__top {

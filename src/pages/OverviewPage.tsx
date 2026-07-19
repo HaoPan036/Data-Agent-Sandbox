@@ -96,7 +96,7 @@ const featureCards = [
     icon: "chart",
     tone: "blue" as const,
     title: "Agent run",
-    body: "Validated read-only SQL, local execution, and the right chart — picked automatically.",
+    body: "Validated read-only SQL, serverless API execution, and the right chart — picked automatically.",
     cta: "See a run",
     href: "/showcase?view=agent"
   },

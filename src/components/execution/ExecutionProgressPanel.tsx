@@ -1,6 +1,12 @@
 import { Badge } from "../ui/Badge";
 
-export type ExecutionProgressStatus = "running" | "completed" | "warning" | "blocked" | "failed";
+export type ExecutionProgressStatus =
+  | "running"
+  | "completed"
+  | "warning"
+  | "blocked"
+  | "failed"
+  | "cancelled";
 
 export interface ExecutionProgressStep {
   id: string;
@@ -13,7 +19,11 @@ export interface ExecutionProgressStep {
 interface ExecutionProgressPanelProps {
   input: string;
   isRunning: boolean;
+  output?: string;
+  runId?: string;
+  status?: ExecutionProgressStatus;
   steps: ExecutionProgressStep[];
+  transport?: string;
 }
 
 function badgeTone(status: ExecutionProgressStatus) {
@@ -21,7 +31,7 @@ function badgeTone(status: ExecutionProgressStatus) {
     return "green";
   }
 
-  if (status === "blocked" || status === "failed" || status === "warning") {
+  if (status === "blocked" || status === "failed" || status === "warning" || status === "cancelled") {
     return "amber";
   }
 
@@ -36,16 +46,40 @@ function titleCase(value: string) {
     .join(" ");
 }
 
-export function ExecutionProgressPanel({ input, isRunning, steps }: ExecutionProgressPanelProps) {
+export function ExecutionProgressPanel({
+  input,
+  isRunning,
+  output,
+  runId,
+  status,
+  steps,
+  transport
+}: ExecutionProgressPanelProps) {
+  const currentStatus = status ?? (isRunning ? "running" : "completed");
+  const safeOutput = output?.trim() ? output : undefined;
+  const terminalOutput =
+    currentStatus === "cancelled"
+      ? "Client stopped receiving events. A synchronous server computation may have continued; retry to run again."
+      : currentStatus === "failed"
+        ? safeOutput ?? "No terminal result is available because the server run failed. Retry to request a fresh result."
+        : safeOutput ?? (isRunning ? "Waiting for server output..." : steps.at(-1)?.detail ?? "No output available.");
+
   return (
-    <section className="execution-progress-panel" aria-label="Live execution process">
+    <section aria-label="Live execution process" aria-live="polite" className="execution-progress-panel">
       <div className="execution-progress-panel__header">
         <div>
           <span className="section-header__eyebrow">Live Run</span>
           <h2>Execution Process</h2>
         </div>
-        <Badge tone={isRunning ? "blue" : "green"}>{isRunning ? "Running" : "Completed"}</Badge>
+        <Badge tone={badgeTone(currentStatus)}>{titleCase(currentStatus)}</Badge>
       </div>
+
+      {runId || transport ? (
+        <div className="execution-run-meta" aria-label="Server run metadata">
+          {runId ? <span>Run ID: {runId}</span> : null}
+          {transport ? <span>Transport: {transport}</span> : null}
+        </div>
+      ) : null}
 
       <div className="execution-io-grid">
         <div>
@@ -54,7 +88,7 @@ export function ExecutionProgressPanel({ input, isRunning, steps }: ExecutionPro
         </div>
         <div>
           <span>Output</span>
-          <p>{steps.at(-1)?.status === "completed" || steps.at(-1)?.status === "blocked" ? steps.at(-1)?.detail : "Waiting for agent output..."}</p>
+          <p>{terminalOutput}</p>
         </div>
       </div>
 

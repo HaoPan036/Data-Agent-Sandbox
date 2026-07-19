@@ -12,7 +12,7 @@ const executionSteps = [
   ["Intent routing", "Classify the business question with deterministic rules."],
   ["SQL generation", "Choose metrics and build read-only SQL from a public template."],
   ["Validation", "Check tables, columns, date filters, sensitive fields, and read-only safety."],
-  ["Execution", "Run validated SQL locally with AlaSQL against synthetic browser data."],
+  ["Execution", "Execute validated SQL in the serverless Node runtime with AlaSQL against synthetic data."],
   ["Result trace", "Render answer, chart data, warnings, SQL, rows, and trace timeline."]
 ] as const;
 

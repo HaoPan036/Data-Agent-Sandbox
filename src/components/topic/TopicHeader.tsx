@@ -22,7 +22,7 @@ export function TopicHeader({ topic }: TopicHeaderProps) {
         <p>{topic.description}</p>
       </div>
       <div className="topic-header__meta">
-        <span>Semantic model, validation, and local execution</span>
+        <span>Semantic model, validation, and deterministic execution through the agent API</span>
         <strong>
           {topic.id === "knowledge-base-demo"
             ? "Knowledge retrieval planned"

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { runAgent } from "../../agent/runAgent";
-import type { AgentRun, GuardrailDecision } from "../../agent/types";
+import { deriveRunOutcome } from "../../agent/runOutcome";
+import type { AgentRun, AgentRunEvent, GuardrailDecision } from "../../agent/types";
+import { useShowcaseRun } from "../showcase/useShowcaseRun";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
@@ -75,24 +76,57 @@ function splitAnswer(answer: string) {
   return chunks;
 }
 
-function rowCount(run: AgentRun) {
-  return run.executionResult.reduce((total, result) => total + result.rowCount, 0);
+function stepCount(events: AgentRunEvent[]) {
+  return events.filter((event) => event.type === "step.completed").length;
+}
+
+function statusLabel(status: string, eventCount: number, run?: AgentRun) {
+  if (status === "running") {
+    return `Server events received: ${eventCount}`;
+  }
+
+  if (status === "cancelled") {
+    return "Client stopped receiving events. Retry to run again.";
+  }
+
+  if (status === "failed") {
+    if (run) {
+      return "Server completed with a failed agent outcome. Review the returned details before retrying.";
+    }
+
+    return "The server run did not finish. Retry to request a fresh result.";
+  }
+
+  return "Ready to run through the serverless agent API.";
 }
 
 export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
   const [selectedQuestion, setSelectedQuestion] = useState(quickQuestions[0].question);
-  const [run, setRun] = useState<AgentRun>();
   const [copyStatus, setCopyStatus] = useState("");
   const selectedConfig = useMemo(
     () => quickQuestions.find((item) => item.question === selectedQuestion) ?? quickQuestions[0],
     [selectedQuestion]
   );
+  const stream = useShowcaseRun(selectedConfig.question, selectedConfig.topicId, { autoStart: false });
+  const { error, events, isRunning, reset, run, startRun, status } = {
+    ...stream,
+    startRun: stream.retry
+  };
   const sqlText = run?.generatedSql.map((statement) => statement.sql).join("\n\n") ?? "";
+  const outcome = run ? deriveRunOutcome(run) : undefined;
+  const answerLabel = !run
+    ? undefined
+    : run.status === "failed"
+      ? "Failed agent outcome"
+      : run.status === "blocked"
+        ? "Blocked outcome"
+        : outcome?.needsOutcomeReview
+          ? "Answer needs review"
+          : "Grounded answer";
 
   async function handleRun() {
-    const nextRun = runAgent(selectedConfig.question, selectedConfig.topicId);
-    setRun(nextRun);
     setCopyStatus("");
+    await startRun();
   }
 
   async function handleCopySql() {
@@ -104,6 +138,20 @@ export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
     setCopyStatus("SQL copied");
   }
 
+  function selectQuestion(question: string) {
+    setSelectedQuestion(question);
+    setCopyStatus("");
+    reset();
+  }
+
+  const badgeTone = run
+    ? outcome?.guardrailTone === "green"
+      ? "green"
+      : "amber"
+    : status === "failed" || status === "cancelled"
+      ? "amber"
+      : "blue";
+
   return (
     <Card className="quick-demo-runner" id="quick-demo">
       <div className="quick-demo-runner__header">
@@ -111,9 +159,7 @@ export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
           <span className="section-header__eyebrow">Quick Demo Runner</span>
           <h2>Run a supported question</h2>
         </div>
-        <Badge tone={!run || run.guardrailDecision === "allowed" ? "green" : "amber"}>
-          {run ? guardrailLabels[run.guardrailDecision] : "Ready"}
-        </Badge>
+        <Badge tone={badgeTone}>{run ? guardrailLabels[run.guardrailDecision] : isRunning ? "Running" : "Ready"}</Badge>
       </div>
 
       <div className="quick-question-list" aria-label="Supported quick questions">
@@ -128,11 +174,7 @@ export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
                 : "quick-question"
             }
             key={item.question}
-            onClick={() => {
-              setSelectedQuestion(item.question);
-              setRun(undefined);
-              setCopyStatus("");
-            }}
+            onClick={() => selectQuestion(item.question)}
             type="button"
           >
             <span>{labelForQuestion(item.question)}</span>
@@ -147,9 +189,15 @@ export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
       </div>
 
       <div className="quick-demo-runner__actions">
-        <Button id="quick-demo-run" onClick={handleRun} variant="primary">
-          Run
-        </Button>
+        {isRunning ? (
+          <Button onClick={stream.cancel} variant="secondary">
+            Stop receiving
+          </Button>
+        ) : (
+          <Button id="quick-demo-run" onClick={handleRun} variant="primary">
+            {status === "failed" || status === "cancelled" ? "Retry" : "Run"}
+          </Button>
+        )}
         <Button
           onClick={() => onOpenTopic(selectedConfig.topicId, selectedQuestion)}
           variant="secondary"
@@ -160,12 +208,15 @@ export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
           Copy SQL
         </Button>
       </div>
+      <p aria-live="polite" className="quick-demo-status" role="status">
+        {error ?? statusLabel(status, events.length, run)}
+      </p>
       {copyStatus ? <p className="quick-demo-copy-status">{copyStatus}</p> : null}
 
       {run ? (
         <div className="quick-demo-result" aria-label="Quick demo result">
           <div className="quick-demo-answer">
-            <strong>Grounded answer</strong>
+            <strong>{answerLabel}</strong>
             {splitAnswer(run.finalAnswer).map((chunk) => (
               <p key={chunk}>{chunk}</p>
             ))}
@@ -178,11 +229,11 @@ export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
             </div>
             <div>
               <dt>Rows</dt>
-              <dd>{rowCount(run)}</dd>
+              <dd>{outcome?.executionRowCount ?? 0}</dd>
             </div>
             <div>
               <dt>Trace</dt>
-              <dd>{run.traceSteps.length} steps</dd>
+              <dd>{stepCount(events)} steps</dd>
             </div>
             <div>
               <dt>Guardrail</dt>
@@ -190,16 +241,38 @@ export function QuickDemoRunner({ onOpenTopic }: QuickDemoRunnerProps) {
             </div>
           </dl>
 
-          {run.generatedSql.length > 0 ? (
+          {outcome?.hasGeneratedSql ? (
             <details className="quick-sql-preview" open>
               <summary>Generated SQL preview</summary>
               <pre>
                 <code>{run.generatedSql[0].sql}</code>
               </pre>
             </details>
-          ) : (
+          ) : outcome?.noSqlOutcome === "safely_blocked" ? (
             <p className="quick-demo-no-sql">No SQL executed. Safe aggregate alternatives are shown above.</p>
+          ) : outcome?.noSqlOutcome === "integrity_mismatch" ? (
+            <p className="quick-demo-no-sql" role="alert">
+              Outcome needs review: the guardrail status or returned execution artifacts are inconsistent.
+            </p>
+          ) : outcome?.noSqlOutcome === "needs_review" ? (
+            <p className="quick-demo-no-sql" role="status">
+              No SQL was generated. Review the guardrail decision and warnings before using this result.
+            </p>
+          ) : (
+            <p className="quick-demo-no-sql">
+              No SQL was generated for this run. Review the trace and server answer.
+            </p>
           )}
+
+          {outcome?.hasGeneratedSql && outcome.hasOutcomeIntegrityMismatch ? (
+            <p className="quick-demo-no-sql" role="alert">
+              Outcome needs review: the guardrail status or returned execution artifacts are inconsistent.
+            </p>
+          ) : outcome?.hasGeneratedSql && run.guardrailDecision === "needs_review" ? (
+            <p className="quick-demo-no-sql" role="status">
+              Review the guardrail decision and warnings before using this result.
+            </p>
+          ) : null}
 
           {run.warnings.length > 0 ? (
             <div className="quick-warning-list" role="status">

@@ -1,3 +1,4 @@
+import { deriveRunOutcome } from "../../agent/runOutcome";
 import type { AgentRun } from "../../agent/types";
 import { ChartPreview } from "./ChartPreview";
 import { GuardrailPanel } from "./GuardrailPanel";
@@ -19,6 +20,8 @@ function titleCase(value: string) {
 }
 
 export function ExecutionResultPanel({ run }: ExecutionResultPanelProps) {
+  const outcome = deriveRunOutcome(run);
+
   return (
     <section className="execution-result-panel" aria-label="Agent execution result">
       <div className="execution-result-panel__header">
@@ -46,7 +49,11 @@ export function ExecutionResultPanel({ run }: ExecutionResultPanelProps) {
       </div>
 
       <ChartPreview spec={run.chartSpec} />
-      <SqlViewer statements={run.generatedSql} validationResults={run.validationResults} />
+      <SqlViewer
+        noSqlOutcome={outcome.noSqlOutcome}
+        statements={run.generatedSql}
+        validationResults={run.validationResults}
+      />
 
       {run.executionResult.map((result, index) => (
         <ResultTable

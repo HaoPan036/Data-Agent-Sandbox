@@ -6,10 +6,11 @@
   "description": "A public, browser-only BI data agent sandbox with deterministic SQL, charts, traces, evaluation, and reports.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && npm run typecheck:api && vite build",
+    "build": "tsc -b && npm run typecheck:node && npm run typecheck:api && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc -b --pretty false && npm run typecheck:api",
+    "typecheck": "tsc -b --pretty false && npm run typecheck:node && npm run typecheck:api",
+    "typecheck:node": "tsc -p tsconfig.node.json --pretty false",
     "typecheck:api": "tsc -p tsconfig.api.json --pretty false",
     "lint": "eslint ."
   },
