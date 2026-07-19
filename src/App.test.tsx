@@ -241,28 +241,47 @@ describe("ShowcasePage", () => {
   });
 
   it("renders the agent run showcase with real server-derived output", async () => {
-    const run = runAgent(
+    const fixture = runFixture(
       "Which product category had the highest refund rate last month?",
       "retail-growth-demo",
-      { runId: "test-showcase-agent" }
+      "run-123e4567-e89b-12d3-a456-426614174000"
     );
-    const fetchMock = vi.fn(() => Promise.resolve(responseFor(runFixture(
-      run.userQuestion,
-      run.topicId,
-      "test-showcase-agent"
-    ).events, run.runId)));
+    let resolveResponse: ((response: Response) => void) | undefined;
+    const pendingResponse = new Promise<Response>((resolve) => {
+      resolveResponse = resolve;
+    });
+    const fetchMock = vi.fn(() => pendingResponse);
     vi.stubGlobal("fetch", fetchMock);
     window.history.pushState({}, "", "/showcase?view=agent");
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "Agent Run" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText(run.finalAnswer)).toBeInTheDocument());
+    expect(screen.queryByText("Run ID")).not.toBeInTheDocument();
+    expect(screen.queryByText(fixture.run.runId)).not.toBeInTheDocument();
+
+    resolveResponse?.(responseFor(fixture.events, fixture.run.runId));
+
+    await waitFor(() => expect(screen.getByText(fixture.run.finalAnswer)).toBeInTheDocument());
+    expect(screen.getByText("Run ID")).toBeInTheDocument();
+    expect(screen.getByText(fixture.run.runId)).toBeInTheDocument();
     expect(screen.getByText(/SELECT o\.category AS category/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Result Preview" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Trace Rail" })).toBeInTheDocument();
     expect(showcaseMetricCard("Guardrail")).toHaveClass("showcase-metric-card--green");
     expect(screen.getByText("Passed")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/runs", expect.objectContaining({ method: "POST" }));
+  });
+
+  it("does not claim a Run ID when the agent showcase request fails", async () => {
+    const fetchMock = vi.fn(() => Promise.reject(new Error("private transport details")));
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.pushState({}, "", "/showcase?view=agent");
+    render(<App />);
+
+    expect(screen.queryByText("Run ID")).not.toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Run needs attention" })).toBeInTheDocument();
+    expect(screen.queryByText("Run ID")).not.toBeInTheDocument();
+    expect(screen.queryByText(/private transport details/i)).not.toBeInTheDocument();
   });
 
   it.each([

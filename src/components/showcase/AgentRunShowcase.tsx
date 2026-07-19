@@ -94,6 +94,12 @@ export function AgentRunShowcase() {
                   <Badge tone="blue">Retail Growth Demo</Badge>
                 </div>
                 <p className="showcase-question">{run.userQuestion}</p>
+                <dl className="showcase-run-id">
+                  <dt>Run ID</dt>
+                  <dd>
+                    <code>{run.runId}</code>
+                  </dd>
+                </dl>
                 <div className="showcase-chip-row">
                   <span className="showcase-chip showcase-chip--violet">{titleCase(run.intent)}</span>
                   {run.selectedMetrics.map((metric) => (
