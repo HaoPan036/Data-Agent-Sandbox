@@ -1,264 +1,207 @@
-# Data Agent Sandbox
+# BI Data Agent Sandbox
+
+A public, runnable BI data-agent demo built with synthetic data and deterministic workflows.
+
+[Live demo](https://data-agent-sandbox.vercel.app/) | [Agent showcase](https://data-agent-sandbox.vercel.app/showcase?view=agent) | [Guardrail showcase](https://data-agent-sandbox.vercel.app/showcase?view=guardrail) | [Evaluation showcase](https://data-agent-sandbox.vercel.app/showcase?view=evaluation)
 
 ## What This Project Is
 
-Data Agent Sandbox is a public, runnable simulation of an AI assisted analysis governance platform. It demonstrates how a small BI data agent turns natural language business questions into deterministic intent routing, validated SQL, local execution results, charts, trace timelines, warnings, guardrail decisions, and grounded answers.
+BI Data Agent Sandbox demonstrates how a small data agent turns a natural-language business question into an intent, selected metrics and tables, validated read-only SQL, executed results, a chart, a grounded answer, and a reviewable trace.
 
-This project uses synthetic or public data only. It does not contain internal company data, code, prompts, schemas, screenshots, business metrics, roadmap details, or proprietary workflows.
+It is a hybrid frontend and serverless application. Interactive runs use a real same-origin API and real SQL execution over synthetic ecommerce data. There is no artificial delay and no precomputed result pretending to be a run; the displayed timing comes from the work performed for that request.
 
 ## Why It Exists
 
-The project answers a simple question: can a small BI data-agent workflow be made observable, testable, governed, and portfolio-safe? The first versions avoid LLM API keys and external services so the core product shape can be inspected locally.
+The project answers one practical question: **does the agent actually work?** A user can submit a prepared or supported question and inspect the complete path from request to SQL, validation, result rows, chart, answer, and trace. Deterministic contracts make that path runnable without an LLM API key and testable before any optional model integration is added.
 
 ## What Works Today
 
-- Vite, React, TypeScript, Vitest, Recharts, and AlaSQL setup.
-- Public platform shell with left navigation, recent sessions, available topics, top actions, topic detail pages, contents rail, sample question chips, and bottom composer.
-- Portfolio-ready UI polish with a compact hero, lifecycle preview, topic health metadata, and execution coverage labels.
-- Deterministic execution for 5 Retail Growth Demo questions and 5 Experiment Metrics Demo questions.
-- Local SQL validation and AlaSQL execution against synthetic browser tables.
-- Result panels with grounded answer, selected intent, selected metrics, selected tables, generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
-- Guardrails that block sensitive customer export or user-level record requests before SQL generation.
-- Evaluation Dashboard with versioned deterministic testsets, real AgentRun execution, pass or fail scoring, failure reasons, trace inspection, failure mode summaries, and local Bad Case Review Queue.
-- Skill Hub demo pipeline that runs deterministic skills end to end and produces an editable downloadable HTML report.
-- Screenshot Showcase route for portfolio-ready agent, guardrail, and evaluation frames.
-- Synthetic ecommerce, traffic, campaign, product, masked customer, refund, and experiment event tables.
-- Semantic schema metadata, metric catalog, topic catalog, and lightweight knowledge base.
-- Deterministic local test coverage for data, topics, schema, metrics, knowledge entries, SQL generation, SQL validation, SQL execution, agent runs, and pages.
+- Two executable topics: `retail-growth-demo` and `experiment-metrics-demo`, with ten prepared business questions in total.
+- Interactive Topic runs, Quick Demo, Agent Showcase, and Guardrail Showcase call `POST /api/runs`.
+- The production API is a Node/Vercel serverless function that validates requests with Zod and streams NDJSON v1 events using transport ID `ndjson-v1`.
+- `runAgent` deterministically routes intent, selects metric and schema context, generates and validates read-only SQL, creates an isolated AlaSQL database, executes against synthetic data, and builds charts, grounded answers, warnings, guardrail decisions, and trace steps.
+- Sensitive user-level export requests are blocked before SQL execution. Unsupported questions return a needs-review outcome rather than invented SQL.
+- The browser validates the response media type, transport ID, run identity, event order, response bounds, streamed-to-terminal trace parity, and terminal outcome integrity before exposing completion.
+- Evaluation runs versioned regression testsets through the deterministic agent in the browser and applies deterministic scoring. Bad Case Review Queue state remains in browser memory and is not persisted.
+- Skills run in the browser and can generate, edit, preview in a sandboxed iframe, and download a self-contained HTML report.
+- `knowledge-base-demo` describes public metadata and governance guidance but is not executable yet.
+- GitHub Actions runs install, typecheck, tests, lint, and build on pushes to `main` and pull requests.
 
-## What This Stage Adds
-
-This stage adds the deterministic execution chain:
-
-- Question to topic context, intent classification, metric selection, SQL generation, SQL validation, local SQL execution, chart-ready data, trace timeline, grounded answer, warnings, and guardrail decision.
-- Retail Growth Demo support for total revenue, refund-rate comparison, weekly revenue trend, revenue-drop diagnostic, and campaign C001 review.
-- Experiment Metrics Demo support for GMV and active users trend, regional funnel conversion, checkout abandonment by variant, revenue per session by variant, and latest-week completeness.
-- Governance support for blocking sensitive export and unsafe customer-record prompts.
-- Knowledge Base Demo remains metadata-only; retrieval execution is planned for a later stage.
-
-## Demo first Overview
-
-The Overview page now exposes a one click deterministic demo. Supported questions run through the real agent path, including intent routing, SQL generation, validation, local execution, trace logging, warnings, and grounded answers.
-
-It also highlights a prepared Retail Growth Demo topic with a default executable business question and a visible execution process from topic context to result trace.
-
-Topic runs now show a live execution process with a short staged delay. The visible input, generated SQL, validation counts, AlaSQL row counts, and final output all come from the same deterministic AgentRun.
-
-## Evaluation Dashboard
-
-The Evaluation Dashboard runs versioned testsets through the real deterministic agent. Each case produces an AgentRun, deterministic pass or fail scoring, failure reasons, trace inspection, and optional local bad case review. No LLM judge is called in this version.
-
-## Skill Runner And HTML Reports
-
-The Skill Hub now runs the public deterministic skills as a demo pipeline. It routes the default business question, generates and validates SQL, executes against synthetic tables, runs the regression evaluation summary, and creates an editable HTML report draft that can be previewed or downloaded in the browser.
-
-## Screenshot Showcase
-
-The app includes a `/showcase` route for portfolio screenshots. The agent, guardrail, and evaluation views are generated from real deterministic execution and evaluation runs. Use `capture=true` to hide nonessential UI.
-
-## Public Platform Layout
-
-The layout is an original public portfolio version inspired by common analytics platform patterns: left sidebar, recent sessions, available topics, main content area, topic information card, summary, data source overview, glossary preview, contents rail, sample question chips, and composer.
-
-## Visual Product Shell Status
-
-The current version implements the public product shell, synthetic topic layer, semantic model, metric catalog, knowledge base, deterministic SQL execution, validation, traces, charts, answers, and guardrails. The demo does not fake SQL, traces, charts, answers, or evaluation output.
-
-## Synthetic Topics
-
-- Retail Growth Demo
-- Experiment Metrics Demo
-- Knowledge Base Demo
-
-## Semantic Model
-
-The schema layer defines every public synthetic table:
-
-- `orders`
-- `traffic`
-- `campaigns`
-- `products`
-- `customers_masked`
-- `refunds`
-- `experiment_events`
-
-Sensitive fields such as `customer_id` and `is_sensitive_masked` are marked now so later guardrails can block user-level export and unsafe access.
-
-## Metric Catalog
-
-The catalog includes revenue, orders, average order value, refund amount, refund rate, sessions, conversion rate, add-to-cart rate, checkout start rate, campaign spend, revenue per session, GMV, active users, checkout abandonment rate, and payment completion rate.
-
-## Knowledge Base
-
-The knowledge layer stores public, generic entries for metric definitions, experiment comparison, campaign baselines, latest week completeness, causal claim caution, sensitive data policy, and ambiguity handling.
-
-## Deterministic Execution Status
-
-Clicking a supported Retail Growth Demo or Experiment Metrics Demo sample question and then Run executes the deterministic workflow locally. Unsupported questions return suggestions. Sensitive customer export prompts are blocked before SQL generation.
-
-## Next Stage: Report Templates And Public Data Expansion
-
-The next stage can add richer report templates, more public or synthetic datasets, and stronger SQL validation edge cases. Optional LLM integration should remain behind explicit API-key configuration.
+No LLM key, authentication, persistent database, saved run history, external warehouse, upload pipeline, or third-party data/model API is required or implemented today.
 
 ## Architecture
 
-More detail is available in [docs/architecture.en.md](docs/architecture.en.md).
+```mermaid
+flowchart LR
+  UI["React UI"] -->|"POST /api/runs"| API["Node / Vercel serverless API"]
+  API --> REQ["Zod request validation"]
+  REQ --> CORE["Deterministic runAgent"]
+  CORE --> SQL["Validated SQL"]
+  DATA["Synthetic tables"] --> DB["Short-lived isolated AlaSQL"]
+  SQL --> DB
+  DB -->|"Executed rows"| CORE
+  CORE --> OUTPUT["Results, chart, trace, answer"]
+  OUTPUT --> EVENTS["Sanitized NDJSON v1 events"]
+  EVENTS --> CHECKS["Strict browser validation"]
+  CHECKS --> VIEW["Validated UI state"]
+  BROWSER["Evaluation and Skills"] -->|"Browser execution"| LOCAL["runAgent + AlaSQL"]
+  DATA -.-> LOCAL
+  LOCAL --> REPORT["Evaluation results and HTML reports"]
+```
 
-## How To Run Locally
+The React/Vite/TypeScript UI uses Recharts for visualizations. In production, Vercel serves the static app and the Node function at `/api/runs`. During `npm run dev` and `npm run preview`, a Vite plugin mounts the same handler as a local API adapter, so one command serves both the UI and API path.
+
+The API sanitizes unexpected failures and SQL execution errors before returning them. API responses enforce no-store, same-origin resource policy, and content-type protection. The site also enforces additional browser security headers. A strict Content Security Policy is currently report-only because browser-side AlaSQL used by Evaluation and Skills relies on dynamic compilation; enforcing it is a roadmap item after those paths move to the backend.
+
+Detailed design: [English architecture](docs/architecture.en.md) | [中文架构](docs/architecture.zh.md)
+
+## How to Run Locally
+
+Node.js 24 is recommended. No `.env` file or API key is needed.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Quality checks:
+Vite prints the local URL. The same process serves the frontend and the local `/api/runs` adapter.
+
+Run the quality gates:
 
 ```bash
 npm run typecheck
 npm run test
+npm run test:contract
+npm run lint
 npm run build
 ```
+
+Inspect the production build locally:
+
+```bash
+npm run preview
+```
+
+`npm run test:contract` is an in-process contract test. It exercises the production client module and NDJSON parser directly against the real API handler for successful, blocked, and needs-review scenarios; it does not launch a browser or HTTP server. `npm run preview` serves the production build together with the local API adapter.
 
 ## Confidentiality Boundary
 
-This project uses synthetic or public data only. It does not contain internal company data, code, prompts, schemas, screenshots, business metrics, roadmap details, or proprietary workflows.
+**This project uses synthetic or public data only. It does not contain internal company data, code, prompts, schemas, screenshots, business metrics, roadmap details, or proprietary workflows.**
+
+All topic names, questions, metric definitions, data, UI content, serverless code, and workflow contracts in this repository are public demo material created for this sandbox.
+
+See [Confidentiality Boundary](docs/confidentiality.en.md).
 
 ## Roadmap
 
-- Add richer HTML report templates and report export polish.
-- Add more public or synthetic datasets.
-- Strengthen SQL parsing and validation edge cases.
-- Add optional LLM integration only behind explicit API-key configuration.
+- Move Evaluation and Skills execution to the backend, then enforce the strict Content Security Policy.
+- Add an optional LLM provider behind the deterministic contracts while keeping the no-key path fully runnable.
+- Add durable run history, evaluation artifacts, and report versions.
+- Add production authentication, distributed rate limiting, and observability.
+- Add connectors for public datasets only, keeping this sandbox synthetic-or-public-data-only.
+- Make long-running execution asynchronous and preemptible so cancellation can stop server computation.
+- Split the frontend bundle into smaller route and feature chunks.
 
-# Data Agent Sandbox 中文说明
+---
+
+# BI Data Agent Sandbox 中文说明
+
+[在线演示](https://data-agent-sandbox.vercel.app/) | [Agent 演示](https://data-agent-sandbox.vercel.app/showcase?view=agent) | [Guardrail 演示](https://data-agent-sandbox.vercel.app/showcase?view=guardrail) | [Evaluation 演示](https://data-agent-sandbox.vercel.app/showcase?view=evaluation)
 
 ## 项目简介
 
-Data Agent Sandbox 是一个公开可运行的 AI 辅助分析治理平台模拟项目。它展示一个小型 BI Data Agent 如何把自然语言业务问题转换为确定性 intent、经过校验的 SQL、本地执行结果、图表、trace、warning、guardrail decision 和有依据的回答。
+BI Data Agent Sandbox 是一个公开、可运行的 BI 数据 Agent 演示项目。它展示一个小型数据 Agent 如何把自然语言业务问题转换为意图、指标和数据表选择、经过校验的只读 SQL、执行结果、图表、有依据的回答，以及可审查的 Trace。
 
-本项目只使用合成数据或公开数据，不包含任何内部公司数据、代码、提示词、schema、截图、业务指标、路线图细节或专有工作流。
+项目采用前端加 Serverless 后端的混合架构。交互式运行会真正调用同源 API，并在合成电商数据上执行 SQL。项目不会人为等待来制造过程感，也不会拿预先写好的结果冒充一次运行；界面显示的时间来自该次请求实际完成的工作。
 
 ## 为什么要做
 
-这个项目回答一个问题：一个小型 BI 数据 Agent 工作流能否做到可观察、可测试、可治理，并且适合公开作品集展示？前几个版本不依赖 LLM API key 或外部服务，便于在本地检查产品形态。
+这个项目回答一个实际问题：**这个 Agent 到底能不能工作？** 用户可以提交准备好的问题或已支持的问题，并查看从请求、SQL、校验到结果行、图表、回答和 Trace 的完整过程。确定性契约使这条链路不依赖 LLM API key，也能在接入任何可选模型前持续测试。
 
 ## 当前可运行能力
 
-- Vite、React、TypeScript、Vitest、Recharts 和 AlaSQL 基础工程。
-- 公共版平台外壳：左侧导航、最近会话、可用 Topics、顶部操作、Topic 详情页、右侧目录、示例问题 chips、底部输入框。
-- Retail Growth Demo 的 5 个问题和 Experiment Metrics Demo 的 5 个问题已经接入确定性执行。
-- 在浏览器内使用 AlaSQL 对合成表进行本地 SQL 校验和执行。
-- 结果面板展示 final answer、intent、指标、数据表、SQL、validation、结果行、chart、trace、warning、guardrail decision 和 follow-up。
-- 对导出客户邮箱、选择所有客户记录等敏感请求，会在 SQL 生成前阻断。
-- 评估面板支持版本化确定性测试集、真实 AgentRun 执行、pass 或 fail 评分、失败原因、Trace 检查、failure mode 汇总和本地 Bad Case Review Queue。
-- Skill Hub demo pipeline 可以端到端运行确定性 skills，并生成可编辑、可下载的 HTML 报告。
-- 新增作品集截图页面，提供 agent、guardrail 和 evaluation 三个截图视图。
-- 合成订单、流量、活动、商品、脱敏客户、退款、实验事件数据表。
-- 语义 schema、指标目录、Topic 目录和轻量知识库。
-- 针对数据、Topic、schema、指标、知识库、SQL 生成、SQL 校验、SQL 执行、agent run 和页面的本地测试。
+- 两个可执行 Topic：`retail-growth-demo` 和 `experiment-metrics-demo`，合计十个准备好的业务问题。
+- Topic 运行、Quick Demo、Agent Showcase 和 Guardrail Showcase 都会调用 `POST /api/runs`。
+- 线上 API 是 Node/Vercel Serverless Function，使用 Zod 校验请求，并通过 `ndjson-v1` Transport 流式返回 NDJSON v1 事件。
+- `runAgent` 以确定性方式完成意图路由、指标和 Schema 选择、只读 SQL 生成与校验、隔离的 AlaSQL 数据库执行，以及图表、回答、Warnings、Guardrail Decision 和 Trace 生成。
+- 用户级敏感导出请求会在 SQL 执行前被阻断；暂不支持的问题会进入 needs-review，而不是编造 SQL。
+- 浏览器在展示完成状态前，会校验响应类型、传输协议、Run ID、事件顺序、大小边界、流式 Trace 与终态 Trace 的一致性，以及最终结果的完整性。
+- Evaluation 在浏览器中用版本化测试集运行确定性 Agent，并进行确定性评分。Bad Case Review Queue 只保存在浏览器状态中，不会持久化。
+- Skills 仍在浏览器中运行，可生成、编辑、在沙箱 iframe 中预览并下载独立 HTML 报告。
+- `knowledge-base-demo` 当前只展示公开元数据和治理说明，尚不能执行检索问答。
+- GitHub Actions 会在推送到 `main` 或创建 Pull Request 时自动执行安装、类型检查、测试、Lint 和构建。
 
-## 本阶段新增内容
-
-本阶段新增确定性执行链路：
-
-- question 到 topic context、intent classification、metric selection、SQL generation、SQL validation、本地 SQL execution、chart-ready data、trace timeline、grounded answer、warnings 和 guardrail decision。
-- Retail Growth Demo 支持总收入、退款率对比、周收入趋势、收入下跌诊断和 C001 活动复盘。
-- Experiment Metrics Demo 支持 GMV/active users 趋势、区域漏斗转化、变体 checkout abandonment、变体 revenue per session 和最新周完整性检查。
-- Governance 支持阻断敏感导出和不安全的客户记录请求。
-- Knowledge Base Demo 当前仍是 metadata-only，知识检索执行会在后续阶段接入。
-
-## Demo 优先的首页
-
-首页现在提供一键运行的确定性 demo。支持的问题会走真实 agent 链路，包括意图识别、SQL 生成、SQL 校验、本地执行、Trace、warnings 和基于结果的回答。
-
-首页也会突出展示一个现成的 Retail Growth Demo Topic，包含默认可执行业务问题，并直接展示从 Topic context 到 result trace 的执行过程。
-
-Topic 运行现在会展示带短暂分阶段延迟的 live execution process。可见的输入、生成 SQL、validation 计数、AlaSQL 行数和最终输出都来自同一次确定性 AgentRun。
-
-## 评估面板
-
-评估面板会把版本化测试集跑过真实的确定性 agent。每个 case 都会生成 AgentRun、确定性 pass 或 fail、失败原因、Trace 检查和本地 Bad Case Review。本版本不调用 LLM judge。
-
-## Skill Runner 和 HTML Reports
-
-Skill Hub 现在可以运行公开的确定性 skills demo pipeline。它会对默认业务问题做意图识别、SQL 生成与校验、本地合成表执行、回归评估摘要，并生成可在浏览器中预览或下载的可编辑 HTML 报告草稿。
-
-## 作品集截图页面
-
-项目新增 `/showcase` 路由，用于作品集截图。Agent、Guardrail 和 Evaluation 视图都来自真实的确定性执行和评估结果。使用 `capture=true` 可以隐藏非必要 UI。
-
-## 公共版平台布局
-
-该布局是原创的公开作品集版本，只借鉴常见分析平台模式：左侧边栏、最近会话、可用 Topics、主内容区、Topic 信息卡、摘要、数据源概览、术语预览、右侧目录、示例问题 chips 和输入框。
-
-## 合成 Topics
-
-- Retail Growth Demo
-- Experiment Metrics Demo
-- Knowledge Base Demo
-
-## 语义模型
-
-schema 层定义了所有公开合成数据表：
-
-- `orders`
-- `traffic`
-- `campaigns`
-- `products`
-- `customers_masked`
-- `refunds`
-- `experiment_events`
-
-`customer_id` 和 `is_sensitive_masked` 等敏感字段已经被标记，便于后续 guardrails 阻止用户级导出和不安全访问。
-
-## 指标目录
-
-指标目录包含 revenue、orders、average order value、refund amount、refund rate、sessions、conversion rate、add-to-cart rate、checkout start rate、campaign spend、revenue per session、GMV、active users、checkout abandonment rate 和 payment completion rate。
-
-## 知识库
-
-知识层保存公开、通用的指标定义、实验对比、活动基线、最新周完整性、因果表述谨慎、敏感数据政策和歧义处理说明。
-
-## 确定性执行状态
-
-点击 Retail Growth Demo 或 Experiment Metrics Demo 的已支持示例问题，再点击 Run，会在本地执行确定性工作流。暂不支持的问题会返回建议问题。敏感客户导出请求会在 SQL 生成前被阻断。
-
-## 下一阶段：报告模板和公开数据扩展
-
-下一阶段可以增加更丰富的报告模板、更多公开或合成数据集，并继续强化 SQL 校验边界。可选 LLM 集成仍应放在用户显式配置 API key 之后。
-
-## 视觉产品外壳状态
-
-当前版本实现了公共版产品外壳、合成 Topic 层、语义模型、指标目录、知识库、确定性 SQL 执行、校验、trace、图表、回答和 guardrails。Demo 不伪造 SQL、trace、图表、回答或评测结果。
+当前不需要也没有实现 LLM key、登录鉴权、持久化数据库、运行历史、外部数仓、上传流程或第三方数据/模型 API。
 
 ## 系统架构
 
-更多细节见 [docs/architecture.zh.md](docs/architecture.zh.md)。
+```mermaid
+flowchart LR
+  UI["React 前端"] -->|"POST /api/runs"| API["Node / Vercel Serverless API"]
+  API --> REQ["Zod 请求校验"]
+  REQ --> CORE["确定性 runAgent"]
+  CORE --> SQL["经过校验的 SQL"]
+  DATA["合成数据表"] --> DB["短生命周期隔离 AlaSQL"]
+  SQL --> DB
+  DB -->|"执行结果行"| CORE
+  CORE --> OUTPUT["结果、图表、Trace、回答"]
+  OUTPUT --> EVENTS["清理后的 NDJSON v1 事件"]
+  EVENTS --> CHECKS["浏览器严格校验"]
+  CHECKS --> VIEW["校验后的界面状态"]
+  BROWSER["Evaluation 和 Skills"] -->|"浏览器内执行"| LOCAL["runAgent + AlaSQL"]
+  DATA -.-> LOCAL
+  LOCAL --> REPORT["评估结果和 HTML 报告"]
+```
+
+前端使用 React、Vite、TypeScript 和 Recharts。线上由 Vercel 托管静态页面，并在 `/api/runs` 提供 Node Serverless Function。本地运行 `npm run dev` 或 `npm run preview` 时，Vite 插件会挂载同一个 Handler 作为本地 API Adapter，因此一个命令就能同时提供前端和 API 路径。
+
+API 会在返回前清理意外错误和 SQL 执行错误。API 响应强制使用 no-store、同源资源策略和内容类型保护，站点还启用了其他浏览器安全响应头。由于 Evaluation 和 Skills 的浏览器端 AlaSQL 依赖动态编译，严格 CSP 目前只处于 Report-Only 模式；等这两条执行路径迁到后端后再正式强制启用。
+
+详细设计：[中文架构](docs/architecture.zh.md) | [English architecture](docs/architecture.en.md)
 
 ## 本地运行
 
+建议使用 Node.js 24。不需要 `.env` 文件，也不需要 API key。
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-质量检查：
+Vite 会输出本地访问地址。同一个进程同时提供前端和本地 `/api/runs` Adapter。
+
+运行质量检查：
 
 ```bash
 npm run typecheck
 npm run test
+npm run test:contract
+npm run lint
 npm run build
 ```
 
+在本地检查生产构建：
+
+```bash
+npm run preview
+```
+
+`npm run test:contract` 是进程内契约测试：它让生产客户端模块和 NDJSON Parser 直接经过真实 API Handler，覆盖成功、阻断和 needs-review 场景，但不会启动浏览器或 HTTP Server。`npm run preview` 会同时提供生产构建产物和本地 API Adapter。
+
 ## 保密边界
 
-本项目只使用合成数据或公开数据，不包含任何内部公司数据、代码、提示词、schema、截图、业务指标、路线图细节或专有工作流。
+**本项目只使用合成数据或公开数据。项目不包含任何公司内部数据、代码、提示词、Schema、截图、业务指标、路线图细节或专有工作流。**
 
-English boundary statement: This project uses synthetic or public data only. It does not contain internal company data, code, prompts, schemas, screenshots, business metrics, roadmap details, or proprietary workflows.
+本仓库中的 Topic 名称、问题、指标定义、数据、界面内容、Serverless 代码和工作流契约，都是专门为这个公开 Sandbox 创建的演示材料。
+
+详见[保密边界](docs/confidentiality.zh.md)。
 
 ## 路线图
 
-- 增加更丰富的 HTML 报告模板和报告导出 polish。
-- 增加更多公开或合成数据集。
-- 强化 SQL 解析与校验边界场景。
-- 仅在用户显式配置 API key 后增加可选 LLM 集成。
+- 将 Evaluation 和 Skills 的执行迁到后端，然后正式强制启用严格 CSP。
+- 在确定性契约后增加可选 LLM Provider，同时保证无 Key 模式始终可以运行。
+- 增加可持久化的运行历史、评估产物和报告版本。
+- 增加生产级鉴权、分布式限流和可观测性。
+- 后续只增加面向公开数据集的 Connector，保证本 Sandbox 始终只使用合成数据或公开数据。
+- 将长任务改为异步、可抢占执行，让取消操作真正停止服务端计算。
+- 按路由和功能拆分前端 Bundle。

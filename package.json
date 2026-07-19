@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "A public, browser-only BI data agent sandbox with deterministic SQL, charts, traces, evaluation, and reports.",
+  "description": "A public BI data agent sandbox with deterministic serverless runs, validated SQL, charts, traces, evaluation, and reports.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && npm run typecheck:node && npm run typecheck:api && vite build",

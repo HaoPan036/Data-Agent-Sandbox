@@ -1,41 +1,43 @@
 # Project Plan
 
-## Completed
+## Purpose
 
-- Created a Vite React TypeScript app.
-- Added synthetic ecommerce, traffic, campaign, product, masked customer, refund, and experiment data.
-- Added topic catalog, semantic schema metadata, metric catalog, and knowledge base.
-- Built the public platform shell with overview, topic detail pages, sidebar, recent sessions, topic cards, contents rail, sample questions, and composer.
-- Completed UI polish for portfolio review with design tokens, compact hero, lifecycle preview, refined cards, topic health metadata, and execution coverage copy.
-- Wired deterministic execution for Retail Growth Demo and Experiment Metrics Demo sample questions.
-- Added intent routing, SQL generation, SQL validation, AlaSQL execution, trace steps, chart specs, grounded answers, warnings, and guardrail decisions.
-- Added UI panels for generated SQL, validation checks, result rows, chart preview, trace timeline, warnings, guardrail decision, and suggested follow-ups.
-- Implemented the demo first Overview with one click deterministic quick runs.
-- Implemented the Evaluation Dashboard with versioned testsets, real AgentRun execution, deterministic scoring, trace review, failure mode summaries, and local Bad Case Review Queue.
-- Implemented the Skill Hub demo pipeline that runs deterministic public skills end to end.
-- Added AgentRun-based HTML report generation with editable browser preview and download.
-- Implemented Screenshot Showcase UI for agent run, guardrail, and evaluation portfolio captures.
-- Added tests for data, semantic metadata, topics, pages, SQL generation, SQL validation, SQL execution, agent runs, and documentation coverage.
+Build a public BI data-agent sandbox that proves a natural-language question can become validated SQL, executed synthetic-data results, a chart, a trace, an evaluation result, and an editable report without requiring an LLM API key.
+
+## Implemented
+
+- React, Vite, TypeScript, Recharts, Vitest, and AlaSQL application.
+- Deterministic synthetic ecommerce and experiment datasets, topic catalog, semantic schema, metric catalog, and public knowledge entries.
+- Ten prepared executable questions across Retail Growth Demo and Experiment Metrics Demo.
+- Shared deterministic `runAgent` core for intent routing, metric and table selection, SQL generation, validation, isolated AlaSQL execution, charts, grounded answers, traces, warnings, and guardrails.
+- Node/Vercel `POST /api/runs` endpoint with Zod request validation, server-generated run IDs, sanitized failures, and NDJSON v1 streaming.
+- Vite dev and preview adapter for the same API handler.
+- Strict browser protocol and outcome validation before a run is shown as complete.
+- Overview Quick Demo, Topic execution, Agent Showcase, and Guardrail Showcase connected to the API.
+- Browser-side Evaluation Dashboard with versioned deterministic testsets, scoring, trace review, failure summaries, and a local Bad Case Review Queue.
+- Browser-side Skill Runner with deterministic execution, evaluation summary, and sandboxed editable/downloadable HTML reports.
+- In-process contract tests that exercise the production client module and parser directly against the real API handler, plus CI for install, typecheck, tests, lint, and build. These tests do not launch a browser or HTTP server.
+- Public Vercel deployment and direct showcase URLs for agent, guardrail, and evaluation views.
 
 ## Current Boundary
 
-- The app executes supported Retail Growth Demo and Experiment Metrics Demo questions locally.
-- The Evaluation Dashboard executes test cases through the real deterministic agent and does not fake results.
-- The Skill Hub executes the demo skill pipeline, evaluation summary, and HTML report generation locally.
-- The Screenshot Showcase uses real deterministic execution and hides nonessential UI with `capture=true`.
-- Knowledge Base Demo remains metadata-only until retrieval execution is added.
-- The UI does not fake SQL, traces, charts, answers, or evaluation results.
+- Interactive runs use a real serverless API and real AlaSQL execution over synthetic data. They do not insert artificial waiting or return a prewritten result.
+- Evaluation and Skills still execute `runAgent` and AlaSQL in the browser.
+- Knowledge Base Demo is metadata-only.
+- No LLM provider, authentication, persistent database, durable history, external warehouse, upload flow, or third-party data/model API exists today.
+- Client cancellation cannot preempt synchronous server computation after it starts.
+- Strict CSP remains report-only while browser-side AlaSQL requires dynamic compilation; other configured security headers are enforced.
 
-## Next Stage: Report Templates And Public Data Expansion
+## Next Work
 
-- Add richer report templates and export polish.
-- Add more public or synthetic datasets.
-- Strengthen SQL parsing and validation edge cases.
+1. Move Evaluation and Skills execution behind the server API, then enforce the strict CSP.
+2. Add durable run history, evaluation artifacts, and report versions.
+3. Add production authentication, distributed rate limiting, and observability.
+4. Make longer runs asynchronous and preemptible for true cancellation.
+5. Split the frontend bundle by route and feature.
 
-## Later Versions
+## Later Options
 
-- Add more public or synthetic datasets.
-- Add more business-question templates.
-- Strengthen SQL parsing and validation.
-- Add richer report exports.
-- Add optional LLM support behind explicit user configuration.
+- Add an optional LLM provider behind the deterministic request, SQL-validation, response, trace, and evaluation contracts. The no-key deterministic path must remain runnable.
+- Add more synthetic or public datasets and question templates.
+- Add connectors for public datasets only; this sandbox remains synthetic-or-public-data-only.

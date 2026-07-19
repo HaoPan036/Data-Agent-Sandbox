@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runAgent } from "./agent/runAgent";
 import type { AgentRun, AgentRunEvent } from "./agent/types";
@@ -927,18 +926,5 @@ describe("EvaluationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Mark reviewed" }));
 
     expect(screen.getByText("reviewed")).toBeInTheDocument();
-  });
-});
-
-describe("README", () => {
-  it("contains English and Chinese stage sections", () => {
-    const readme = readFileSync(`${process.cwd()}/README.md`, "utf8");
-
-    expect(readme).toContain("Visual Product Shell Status");
-    expect(readme).toContain("视觉产品外壳状态");
-    expect(readme).toContain("Evaluation Dashboard");
-    expect(readme).toContain("评估面板");
-    expect(readme).toContain("Screenshot Showcase");
-    expect(readme).toContain("作品集截图页面");
   });
 });

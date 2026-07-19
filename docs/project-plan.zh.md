@@ -1,41 +1,43 @@
 # 项目计划
 
-## 已完成
+## 目标
 
-- 创建 Vite React TypeScript 应用。
-- 增加合成订单、流量、活动、商品、脱敏客户、退款和实验数据。
-- 增加 Topic 目录、语义 schema 元数据、指标目录和知识库。
-- 构建公共版平台外壳，包括 overview、Topic 详情页、侧边栏、最近会话、Topic 卡片、右侧目录、示例问题和输入框。
-- 完成适合作品集评审的 UI polish，包括设计 tokens、紧凑 hero、生命周期预览、优化卡片、Topic health 元数据和执行覆盖文案。
-- 接入 Retail Growth Demo 和 Experiment Metrics Demo 示例问题的确定性执行。
-- 增加 intent routing、SQL generation、SQL validation、AlaSQL execution、trace steps、chart specs、grounded answers、warnings 和 guardrail decisions。
-- 增加 SQL、validation checks、结果行、chart preview、trace timeline、warnings、guardrail decision 和 suggested follow-ups 的 UI 面板。
-- 实现 demo 优先的 Overview，支持一键运行确定性 quick run。
-- 实现 Evaluation Dashboard，包含版本化测试集、真实 AgentRun 执行、确定性评分、Trace review、failure mode 汇总和本地 Bad Case Review Queue。
-- 实现 Skill Hub demo pipeline，可以端到端运行公开确定性 skills。
-- 增加基于 AgentRun 的 HTML 报告生成，支持浏览器内编辑预览和下载。
-- 实现 Screenshot Showcase UI，用于 agent run、guardrail 和 evaluation 的作品集截图。
-- 增加数据、语义元数据、Topic、页面、SQL 生成、SQL 校验、SQL 执行、agent run 和文档覆盖测试。
+构建一个公开的 BI 数据 Agent Sandbox，证明自然语言问题可以在不需要 LLM API key 的情况下，转换为经过校验的 SQL、合成数据执行结果、图表、Trace、评估结果和可编辑报告。
+
+## 已实现
+
+- 基于 React、Vite、TypeScript、Recharts、Vitest 和 AlaSQL 的应用。
+- 确定性合成电商与实验数据、Topic 目录、语义 Schema、指标目录和公开知识条目。
+- Retail Growth Demo 和 Experiment Metrics Demo 共十个准备好的可执行问题。
+- 共享确定性 `runAgent` 核心，覆盖意图路由、指标和表选择、SQL 生成、校验、隔离的 AlaSQL 执行、图表、回答、Trace、Warnings 和 Guardrails。
+- Node/Vercel `POST /api/runs` 接口，支持 Zod 请求校验、服务端 Run ID、错误清理和 NDJSON v1 流式传输。
+- Vite Dev 和 Preview 使用同一个 API Handler Adapter。
+- 浏览器会严格校验传输协议和最终结果完整性，校验通过后才展示运行完成。
+- Overview Quick Demo、Topic 执行、Agent Showcase 和 Guardrail Showcase 已接入 API。
+- 浏览器端 Evaluation Dashboard，包含版本化确定性测试集、评分、Trace Review、失败汇总和本地 Bad Case Review Queue。
+- 浏览器端 Skill Runner，包含确定性执行、评估摘要，以及沙箱化、可编辑、可下载的 HTML 报告。
+- 进程内契约测试会让生产客户端模块和 Parser 直接经过真实 API Handler，但不会启动浏览器或 HTTP Server；CI 会自动执行安装、类型检查、测试、Lint 和构建。
+- 公开 Vercel 部署，以及 Agent、Guardrail、Evaluation 的直接演示地址。
 
 ## 当前边界
 
-- 当前应用会在本地执行已支持的 Retail Growth Demo 和 Experiment Metrics Demo 问题。
-- Evaluation Dashboard 会通过真实确定性 agent 执行测试集，不伪造评测结果。
-- Skill Hub 会在本地执行 demo skill pipeline、评估摘要和 HTML 报告生成。
-- Screenshot Showcase 使用真实确定性执行，并通过 `capture=true` 隐藏非必要 UI。
-- Knowledge Base Demo 在接入检索执行前仍是 metadata-only。
-- UI 不伪造 SQL、Trace、图表、回答或评测结果。
+- 交互式运行会经过真实 Serverless API，并在合成数据上真正执行 AlaSQL；不会人为等待来制造过程感，也不会返回预先写好的结果。
+- Evaluation 和 Skills 仍在浏览器中执行 `runAgent` 和 AlaSQL。
+- Knowledge Base Demo 只展示元数据。
+- 当前没有 LLM Provider、鉴权、持久化数据库、运行历史、外部数仓、上传流程或第三方数据/模型 API。
+- 客户端取消不能抢占已经开始的同步服务端计算。
+- 浏览器端 AlaSQL 仍依赖动态编译，因此严格 CSP 当前处于 Report-Only；其他已配置安全响应头会强制执行。
 
-## 下一阶段：报告模板和公开数据扩展
+## 下一步
 
-- 增加更丰富的报告模板和导出 polish。
-- 增加更多公开或合成数据集。
-- 强化 SQL 解析与校验边界场景。
+1. 将 Evaluation 和 Skills 执行放到服务端 API 后，再正式强制启用严格 CSP。
+2. 增加持久化运行历史、评估产物和报告版本。
+3. 增加生产级鉴权、分布式限流和可观测性。
+4. 将较长运行改为异步、可抢占执行，实现真正取消。
+5. 按路由和功能拆分前端 Bundle。
 
-## 后续版本
+## 后续选项
 
-- 增加更多公开或合成数据集。
-- 增加更多业务问题模板。
-- 强化 SQL 解析与校验。
-- 增加更丰富的报告导出能力。
-- 在用户显式配置后增加可选 LLM 支持。
+- 在确定性请求、SQL 校验、响应、Trace 和评估契约之后接入可选 LLM Provider，同时保持无 Key 确定性路径始终可运行。
+- 增加更多合成或公开数据集和问题模板。
+- 只增加面向公开数据集的 Connector；本 Sandbox 始终只使用合成数据或公开数据。
